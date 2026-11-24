@@ -1,23 +1,25 @@
-Table of Contents
-=================
+目次
+=====
 
-  * [ELFs](#elfs)
-    * [Loading ELF files](#loading-elf-files)
-    * [Using Symbols](#using-symbols)
-    * [Changing the Base Address](#changing-the-base-address)
-    * [Reading ELF Files](#reading-elf-files)
-    * [Patching ELF Files](#patching-elf-files)
-    * [Searching ELF Files](#searching-elf-files)
-    * [Building ELF Files](#building-elf-files)
-    * [Running and Debugging ELF Files](#running-and-debugging-elf-files)
+  * [ELF](#elfs)
+    * [ELF ファイルの読み込み](#loading-elf-files)
+    * [シンボルの利用](#using-symbols)
+    * [ベースアドレスの変更](#changing-the-base-address)
+    * [ELF ファイルの読み取り](#reading-elf-files)
+    * [ELF ファイルへのパッチ当て](#patching-elf-files)
+    * [ELF ファイルの検索](#searching-elf-files)
+    * [ELF ファイルの作成](#building-elf-files)
+    * [ELF ファイルの実行とデバッグ](#running-and-debugging-elf-files)
 
-# ELFs
+<a id="elfs"></a>
+# ELF
 
-Pwntools makes interacting with ELF files relatively straightforward, via the `ELF` class.  You can find the full documentation on [RTD](https://pwntools.readthedocs.org/en/latest/elf.html).
+Pwntools では、`ELF` クラスを通じて ELF ファイルを比較的簡単に扱えます。完全なドキュメントは [RTD](https://pwntools.readthedocs.org/en/latest/elf.html) にあります。
 
-## Loading ELF files
+<a id="loading-elf-files"></a>
+## ELF ファイルの読み込み
 
-ELF files are loaded by path.  Upon being loaded, some security-relevant attributes about the file are printed.
+ELF ファイルはパスを指定して読み込みます。読み込むと、そのファイルのセキュリティに関わる属性がいくつか表示されます。
 
 ```py
 from pwn import *
@@ -32,16 +34,17 @@ e = ELF('/bin/bash')
 #     FORTIFY:  Enabled
 ```
 
-## Using Symbols
+<a id="using-symbols"></a>
+## シンボルの利用
 
-ELF files have a few different sets of symbols available, each contained in a dictionary of `{name: data}`.
+ELF ファイルでは、何種類かのシンボルの集まりが使えます。それぞれ `{name: data}` という辞書に入っています。
 
-- `ELF.symbols` lists all known symbols, including those below.  Preference is given the PLT entries over GOT entries.
-- `ELF.got` only contains GOT entries
-- `ELF.plt` only contains PLT entries
-- `ELF.functions` only contains functions (requires DWARF symbols)
+- `ELF.symbols` は、以下のものを含め、分かっているすべてのシンボルを列挙します。GOT エントリよりも PLT エントリが優先されます。
+- `ELF.got` は GOT エントリだけを含みます
+- `ELF.plt` は PLT エントリだけを含みます
+- `ELF.functions` は関数だけを含みます (DWARF シンボルが必要です)
 
-This is very useful in keeping exploits robust, by removing the need to hard-code addresses.
+アドレスを直接書き込む必要がなくなるので、エクスプロイトを壊れにくく保つのにとても役立ちます。
 
 ```py
 from pwn import *
@@ -55,7 +58,7 @@ print "%#x -> plt.execve" % e.plt['execve']
 print "%#x -> list_all_jobs" % e.functions['list_all_jobs'].address
 ```
 
-This would print something like the following:
+次のような内容が出力されます。
 
 ```
 0x4ba738 -> license
@@ -65,9 +68,10 @@ This would print something like the following:
 0x446420 -> list_all_jobs
 ```
 
-## Changing the Base Address
+<a id="changing-the-base-address"></a>
+## ベースアドレスの変更
 
-Changing the base address of the ELF file (e.g. to adjust for ASLR) is very straightforward.  Let's change the base address of `bash`, and see all of the symbols change.
+ELF ファイルのベースアドレスの変更 (たとえば ASLR に合わせた調整) は、とても簡単です。`bash` のベースアドレスを変えて、すべてのシンボルが変わる様子を見てみましょう。
 
 ```py
 from pwn import *
@@ -86,7 +90,7 @@ print "%#x -> entry point" % e.entry
 print "%#x -> execve" % e.symbols['execve']
 ```
 
-This should print something like:
+次のような内容が出力されるはずです。
 
 ```
 0x400000 -> base address
@@ -98,9 +102,10 @@ This should print something like:
 0x1235db60 -> execve
 ```
 
-## Reading ELF Files
+<a id="reading-elf-files"></a>
+## ELF ファイルの読み取り
 
-We can directly interact with the ELF as if it were loaded into memory, using `read`, `write`, and functions named identically to that in the `packing` module.  Additionally, you can see the disassembly via the `disasm` method.
+ELF がメモリに読み込まれているかのように、`read`、`write`、そして `packing` モジュールと同じ名前の関数を使って直接やり取りできます。さらに、`disasm` メソッドで逆アセンブル結果も見られます。
 
 ```py
 from pwn import *
@@ -117,7 +122,7 @@ print e.read(license, 14)
 print e.disasm(e.symbols['main'], 12)
 ```
 
-This prints something like:
+次のような内容が出力されます。
 
 ```
 '\x7fELF'
@@ -128,22 +133,23 @@ License GPLv3+
   41eab4:       41 55                   push   r13
 ```
 
-## Patching ELF Files
+<a id="patching-elf-files"></a>
+## ELF ファイルへのパッチ当て
 
-Patching ELF files is just as simple.
+ELF ファイルへのパッチ当ても同じく簡単です。
 
 ```py
 from pwn import *
 
 e = ELF('/bin/bash')
 
-# Cause a debug break on the 'exit' command
+# 'exit' コマンドでデバッグ用のブレークを発生させる
 e.asm(e.symbols['exit_builtin'], 'int3')
 
-# Disable chdir and just print it out instead
+# chdir を無効にして、代わりに内容を出力するだけにする
 e.pack(e.got['chdir'], e.plt['puts'])
 
-# Change the license
+# ライセンスを変更する
 p_license = e.symbols['bash_license']
 license = e.unpack(p_license)
 e.write(license, 'Hello, world!\n\x00')
@@ -151,7 +157,7 @@ e.write(license, 'Hello, world!\n\x00')
 e.save('./bash-modified')
 ```
 
-We can then run our modified version of bash.
+これで、変更した bash を実行できます。
 
 ```
 $ chmod +x ./bash-modified
@@ -165,10 +171,11 @@ No chdir for you!
 ./bash-modified: line 0: cd: No chdir for you!: No such file or directory
 ```
 
-## Searching ELF Files
+<a id="searching-elf-files"></a>
+## ELF ファイルの検索
 
-Every once in a while, you just need to find some byte sequence.  The most common example is searching for e.g. `"/bin/sh\x00"` for an `execve` call.
-The `search` method returns an iterator, allowing you to either take the first result, or keep searching if you need something special (e.g. no bad characters in the address).  You can optionally pass a `writable` argument to `search`, indicating it should only return addresses in writable segments.
+ときどき、あるバイト列を見つけたいことがあります。最もよくある例は、`execve` の呼び出しのために `"/bin/sh\x00"` などを探すことです。
+`search` メソッドはイテレータを返すので、最初の結果を使うことも、特別な条件が必要なら (たとえばアドレスに bad character を含まないものなど) 検索を続けることもできます。`search` に `writable` 引数を渡すと、書き込み可能なセグメント内のアドレスだけを返すようにできます。
 
 ```py
 from pwn import *
@@ -179,16 +186,17 @@ for address in e.search('/bin/sh\x00'):
     print hex(address)
 ```
 
-The above example prints something like:
+上の例は、次のような内容を出力します。
 
 ```
 0x420b82
 0x420c5e
 ```
 
-## Building ELF Files
+<a id="building-elf-files"></a>
+## ELF ファイルの作成
 
-ELF files can be created from scratch relatively easy.  All of these functions are context-aware.  The relevant functions are `from_bytes` and `from_assembly`.  Each returns an `ELF` object, which can easily be saved to file.
+ELF ファイルは、ゼロから比較的簡単に作れます。これらの関数はすべてコンテキストを考慮します。関係する関数は `from_bytes` と `from_assembly` です。どちらも `ELF` オブジェクトを返し、それを簡単にファイルへ保存できます。
 
 ```
 from pwn import *
@@ -198,9 +206,10 @@ ELF.from_assembly('int3').save('int3-2')
 ELF.from_assembly('nop', arch='powerpc').save('powerpc-nop')
 ```
 
-## Running and Debugging ELF Files
+<a id="running-and-debugging-elf-files"></a>
+## ELF ファイルの実行とデバッグ
 
-If you have an `ELF` object, you can run or debug it directly.  The following are equivalent:
+`ELF` オブジェクトがあれば、それを直接実行したりデバッグしたりできます。次の 2 つは同じ意味です。
 
 ```py
 >>> io = elf.process()
@@ -208,7 +217,7 @@ If you have an `ELF` object, you can run or debug it directly.  The following ar
 >>> io = process(elf.path)
 ```
 
-Similarly, you can launch a debugger trivially attached to your ELF.  This is super useful when testing shellcode, without the need for a C wrapper to load and debug it.
+同様に、ELF にデバッガをアタッチした状態で簡単に起動できます。シェルコードをテストするとき、読み込んでデバッグするための C のラッパーが要らなくなるので、とても便利です。
 
 ```py
 >>> io = elf.debug()

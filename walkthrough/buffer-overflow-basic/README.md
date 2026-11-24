@@ -1,23 +1,23 @@
-# Basic Buffer Overflow
+# 基本的なバッファオーバーフロー
 
-This directory is the most basic, classic, stack-based buffer overflow.
+このディレクトリには、最も基本的で古典的なスタックベースのバッファオーバーフローが入っています。
 
-The stack is executable, and the binary is not randomized.
+スタックは実行可能で、バイナリはランダム化されていません。
 
-A few things are demonstrated in this example:
+この例では、次のことを示します。
 
 - `process` tube
-- `gdb.attach` for debugging processes
-- `ELF` for searching for assembly instructions
-- `cyclic` and `cyclic_find` for calculating offsets
-- `pack` for packing integers into byte strings
-- `asm` for assembling shellcode
-- `shellcraft` for providing a shellcode library
-- `tube.interactive` for enjoying your shell
+- プロセスのデバッグ用の `gdb.attach`
+- アセンブリ命令を検索するための `ELF`
+- オフセットを計算するための `cyclic` と `cyclic_find`
+- 整数をバイト列にパックするための `pack`
+- シェルコードをアセンブルするための `asm`
+- シェルコードライブラリを提供する `shellcraft`
+- シェルを楽しむための `tube.interactive`
 
-Feel free to modify the example, and try some other shellcode snippet!
+この例を自由に改造して、ほかのシェルコードも試してみてください。
 
-You can easily list the available shellcode from the command-line:
+利用可能なシェルコードは、コマンドラインから簡単に一覧表示できます。
 
 ```
 $ shellcraft | grep i386

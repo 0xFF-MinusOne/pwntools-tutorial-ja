@@ -1,47 +1,49 @@
-Table of Contents
-=================
+目次
+=====
 
-  * [Prerequisites](#prerequisites)
-  * [Launching a Process Under GDB](#launching-a-process-under-gdb)
-  * [Attaching to a Running Process](#attaching-to-a-running-process)
-	  * [Local Processes](#local-processes)
-	  * [Forking Servers](#forking-servers)
-  * [Debugging Foreign Architectures](#debugging-foreign-architectures)
-  * [Troubleshooting](#troubleshooting)
-	  * [Behind the Scenes](#behind-the-scenes)
-	  * [Specifying a Terminal Window](#specifying-a-terminal-window)
-	  * [Environment Variables](#environment-variables)
-	  * [Unable to Attach to Processes](#unable-to-attach-to-processes)
+  * [前提条件](#prerequisites)
+  * [GDB でプロセスを起動する](#launching-a-process-under-gdb)
+  * [実行中のプロセスにアタッチする](#attaching-to-a-running-process)
+	  * [ローカルプロセス](#local-processes)
+	  * [フォークするサーバー](#forking-servers)
+  * [他のアーキテクチャのデバッグ](#debugging-foreign-architectures)
+  * [トラブルシューティング](#troubleshooting)
+	  * [裏側で何が起きているか](#behind-the-scenes)
+	  * [端末ウィンドウの指定](#specifying-a-terminal-window)
+	  * [環境変数](#environment-variables)
+	  * [プロセスにアタッチできない場合](#unable-to-attach-to-processes)
 	  * [argv0 and argc==0](#argv0-and-argc0)
 
-Pwntools has rich support for using a debugger in your exploit workflow, and debuggers
-are very useful when developing exploits when issues with exploits arise.
+Pwntools は、エクスプロイトの作業の流れの中でデバッガを使うことを手厚くサポートしています。
+エクスプロイトの開発中に問題が起きたとき、デバッガはとても役に立ちます。
 
-In addition to the resources here for debugging, you may want to enhance your GDB
-experience with one of the following projects:
+ここにあるデバッグ用の資料に加えて、次のプロジェクトのいずれかで
+GDB をより使いやすくするとよいかもしれません。
 
 * [Pwndbg](https://pwndbg.re)
 * [GDB Enhanced Features (GEF)](https://github.com/hugsy/gef)
 
-# Prerequisites
+<a id="prerequisites"></a>
+# 前提条件
 
-You should have both `gdb` and `gdbserver` installed on your machine.
-You can check this easily with `which gdb` or `which gdbserver`.
+手元のマシンに `gdb` と `gdbserver` の両方をインストールしておく必要があります。
+`which gdb` や `which gdbserver` で簡単に確認できます。
 
-If you find that you don't have them installed, they can easily be installed from
-most package managers.
+インストールされていない場合は、たいていのパッケージマネージャーから
+簡単にインストールできます。
 
 ```sh
 $ sudo apt-get install gdb gdbserver
 ```
 
-# Launching a Process Under GDB
+<a id="launching-a-process-under-gdb"></a>
+# GDB でプロセスを起動する
 
-Launching a process under GDB while still being able to interact with that process
-from pwntools is a tricky process, but luckily it's all been sorted out and the 
-process is pretty seamless.
+プロセスを GDB の下で起動しつつ、pwntools からもそのプロセスとやり取りできるようにするのは
+厄介な作業ですが、幸い、すべて整理されていて、
+ほとんど違和感なく使えます。
 
-To launch a process under GDB from the very first instruction, just use 
+プロセスを最初の命令から GDB の下で起動するには、
 [gdb.debug](https://docs.pwntools.com/en/stable/gdb.html#pwnlib.gdb.debug).
 
 ```py
@@ -52,47 +54,49 @@ To launch a process under GDB from the very first instruction, just use
 >>> io.interactive()
 ```
 
-This should automatically launch the debugger in a new window for you to interact
-with.  If it does not, or you see an error about `context.terminal`, check out the
-section on [Specifying a Terminal Window](#specifying-a-terminal-window).
+これで、デバッガが新しいウィンドウで自動的に起動し、操作できるようになるはずです。
+そうならない場合や、`context.terminal` に関するエラーが出る場合は、
+[端末ウィンドウの指定](#specifying-a-terminal-window)の節を見てください。
 
-In this example, we passed in `gdbscript='continue'` in order for the debugger
-to resume execution, but you can pass in any valid GDB script commands and they
-will be executed when the debugged process starts.
+この例では、デバッガが実行を再開するように `gdbscript='continue'` を渡しました。
+ただし、有効な GDB スクリプトのコマンドなら何でも渡せます。
+それらは、デバッグ対象のプロセスが起動したときに実行されます。
 
-# Attaching to a Running Process
+<a id="attaching-to-a-running-process"></a>
+# 実行中のプロセスにアタッチする
 
-Sometimes you don't want to start your target under a debugger, but want to attach
-to it at a certain stage in the exploitation process.  
-This is also handled seamlessly by Pwntools.
+対象をデバッガの下で起動したくないけれど、エクスプロイトの途中のある段階で
+アタッチしたい、ということがあります。  
+これも Pwntools が違和感なく処理してくれます。
 
-## Local Processes
+<a id="local-processes"></a>
+## ローカルプロセス
 
-Generally, you will have created a `process()` tube in order to interact with the
-target executable.  You can simply pass that to `gdb.attach()` and it will magically
-open a new terminal window with the target binary under the debugger.
+通常は、対象の実行ファイルとやり取りするために `process()` の tube を作っているはずです。
+それを `gdb.attach()` に渡すだけで、対象のバイナリがデバッガの下にある状態で
+新しい端末ウィンドウが魔法のように開きます。
 
 ```py
 >>> io = process('/bin/sh')
 >>> gdb.attach(io, gdbscript='continue')
 ```
 
-A new window should appear, and you can continue to interact with the process
-as you normally would from Pwntools.
+新しいウィンドウが現れます。プロセスとは、これまでどおり Pwntools からやり取りを続けられます。
 
-## Forking Servers
+<a id="forking-servers"></a>
+## フォークするサーバー
 
-Sometimes the binary you want to debug has a forking server, and you want to
-debug the process you are connected to (rather than the server itself).  This
-is also done seamlessly, as long as the server is running on the current machine.
+デバッグしたいバイナリが、フォークするサーバーであることがあります。そのとき、
+(サーバー自体ではなく) 接続先のプロセスをデバッグしたい場合があります。
+これも、サーバーが同じマシン上で動いている限り、違和感なく行えます。
 
-Let's fake a server with socat!
+socat で擬似的なサーバーを作ってみましょう。
 
 ```py
 >>> socat = process(['socat', 'TCP-LISTEN:4141,reuseaddr,fork', 'EXEC:/bin/bash -i'])
 ```
 
-Then we connect to the remote process with a `remote` tube as usual.
+次に、いつもどおり `remote` の tube でリモートのプロセスに接続します。
 
 
 ```py
@@ -106,22 +110,23 @@ b'hello\n'
 >>> io.lport, io.rport
 ```
 
-It works!  In order to debug the specific `bash` process our `remote` object, just
-pass it to `gdb.attach()`.  Pwntools will look up the PID of the remote end of the 
-connection and attempt to connect to it automatically.
+うまくいきました。`remote` オブジェクトの接続先である特定の `bash` プロセスをデバッグするには、
+それを `gdb.attach()` に渡すだけです。Pwntools は接続の相手側の PID を調べ、
+自動的にそこへ接続しようとします。
 
 ```py
 >>> gdb.attach(io)
 ```
 
-A debugger should appear automatically, and you can interact with the process.
+デバッガが自動的に現れ、プロセスを操作できます。
 
 <!-- TODO: This is currently broken, see https://github.com/Gallopsled/pwntools/issues/1589 -->
 
-# Debugging Foreign Architectures
+<a id="debugging-foreign-architectures"></a>
+# 他のアーキテクチャのデバッグ
 
-Debugging foreign architectures (like ARM or PowerPC) from an Intel-based system is
-as easy as running them under pwntools.
+Intel ベースのシステム上から、他のアーキテクチャ (ARM や PowerPC など) をデバッグするのは、
+pwntools の下でそれらを実行するのと同じくらい簡単です。
 
 ```py
 >>> context.arch = 'arm'
@@ -130,40 +135,42 @@ as easy as running them under pwntools.
 b'Hello, world!\n'
 ```
 
-Instead of invoking `process(...)` just use `gdb.debug(...)`.
+`process(...)` を呼ぶ代わりに、`gdb.debug(...)` を使うだけです。
 
 ```py
 >>> gdb.debug(elf.path).recvall()
 b'Hello, world!\n'
 ```
 
-## Tips and Limitations
+<a id="tips-and-limitations"></a>
+## ヒントと制限事項
 
-Processes running foreign architectures MUST be started with `gdb.debug` in order
-to debug them, it is not possible to attach to a running process due to the way
-that QEMU works.
+他のアーキテクチャで動くプロセスをデバッグするには、必ず `gdb.debug` で起動する必要があります。
+QEMU の仕組み上、実行中のプロセスにアタッチすることはできません。
 
-It should be noted that QEMU has a very limited GDB stub, which is used to
-inform GDB where various libraries are, so debugging may be more difficult,
-and some commands will not work.
+QEMU の GDB スタブは機能がとても限られていることに注意してください。
+このスタブは、各種ライブラリがどこにあるかを GDB に伝えるために使われます。
+そのため、デバッグが難しくなることがあり、使えないコマンドもあります。
 
-Pwntools recommends Pwndbg to handle this situation, since it has code specifically
-to handle debugging under a QEMU stub.
+この状況には Pwndbg を使うことを Pwntools は勧めています。QEMU スタブの下での
+デバッグを扱うための専用のコードがあるからです。
 
 <!-- TODO: There is no tutorial for interacting with cross-arch binaries -->
 
-# Troubleshooting
+<a id="troubleshooting"></a>
+# トラブルシューティング
 
-## Behind the Scenes
+<a id="behind-the-scenes"></a>
+## 裏側で何が起きているか
 
-Sometimes things just don't work, and you need to see what is happening internal
-to Pwntools with the debugger setup.
+うまく動かないとき、デバッガの設定で Pwntools の内部で何が起きているかを
+見る必要があることがあります。
 
-You can set the logging context globally (via e.g. `context.log_level='debug'`)
-or you can set it ONLY for the GDB session, via passing in the same argument.
+ログの設定は、グローバルに (たとえば `context.log_level='debug'` で) 指定することも、
+同じ引数を渡して GDB のセッションだけに指定することもできます。
 
-You should see everything that's being handled for you behind the scenes.
-For example:
+裏側であなたの代わりに処理されていることがすべて見えるはずです。
+例を示します。
 
 ```py
 >>> io = gdb.debug('/bin/sh', log_level='debug')
@@ -182,44 +189,46 @@ For example:
 ```
 
 
-## Specifying a Terminal Window
+<a id="specifying-a-terminal-window"></a>
+## 端末ウィンドウの指定
 
-Pwntools [attempts to launch a new window][run_in_new_terminal] to container your 
-debugger based on whatever windowing system you are currently using.  
+Pwntools は、現在使っているウィンドウシステムに合わせて、デバッガを入れるための
+[新しいウィンドウを起動しようとします][run_in_new_terminal]。  
 
-By default, it auto-detects:
+既定では、次のものを自動検出します。
 
-* tmux or screen
-* X11-based terminals like GNOME Terminal
+* tmux または screen
+* GNOME Terminal のような X11 ベースの端末
 
-If you are not using a supported terminal environment, or it does not work in the
-way you want (e.g. horizontal vs vertical splits) you can add support by setting
-the `context.terminal` environment variable.
+サポートされている端末環境を使っていない場合や、思いどおりに動かない場合
+(たとえば水平分割と垂直分割の違いなど) は、
+`context.terminal` 環境変数を設定することで対応を追加できます。
 
-For example, the following will use TMUX to split horizontally instead of the default.
+たとえば、次の設定では、既定の分割の代わりに TMUX で水平に分割します。
 
 ```py
 >>> context.terminal = ['tmux', 'splitw', '-h']
 ```
 
-Maybe you're a GNOME Terminal user and the default settings aren't working?
+GNOME Terminal を使っていて、既定の設定がうまく動かない場合はどうでしょう。
 
 ```py
 >>> context.terminal = ['gnome-terminal', '-x', 'sh', '-c']
 ```
 
-You can specify any terminal you like, and can even put the setting inside
-`~/.pwn.conf` so that it's used for all of you scripts!
+好きな端末を指定できます。その設定を `~/.pwn.conf` に書いておけば、
+すべてのスクリプトで使われます。
 
 ```
 [context]
 terminal=['x-terminal-emulator', '-e']
 ```
 
-## Environment Variables
+<a id="environment-variables"></a>
+## 環境変数
 
-Pwntools allows you to specify any environment variables you like via `process()`,
-and the same is true for `gdb.debug()`.
+Pwntools では、`process()` を通じて好きな環境変数を指定できます。
+`gdb.debug()` でも同じです。
 
 ```py
 >>> io = gdb.debug(['bash', '-c', 'echo $HELLO'], env={'HELLO': 'WORLD'})
@@ -229,9 +238,9 @@ b'WORLD\n'
 
 ### `CWD` and `   `
 
-Unfortunately, when using `gdb.debug()`, the process is launched under `gdbserver`
-which adds its own environment variables.  This may introduce complications when
-the environment must be very carefully controlled.
+残念ながら、`gdb.debug()` を使うと、プロセスは `gdbserver` の下で起動され、
+`gdbserver` が独自の環境変数を追加します。環境をごく慎重に制御する必要がある場合、
+これが面倒の原因になることがあります。
 
 ```py
 >>> io = gdb.debug(['env'], env={'FOO':'BAR'}, gdbscript='continue')
@@ -243,28 +252,27 @@ Child exited with status 0
 GDBserver exiting
 ```
 
-This only occurs when you launch the process under a debugger with `gdb.debug()`.
-If you're able to start your process and *then* attach with `gdb.attach()`, you
-can avoid this issue.
+これは、`gdb.debug()` でプロセスをデバッガの下で起動した場合にだけ起こります。
+プロセスを先に起動し、*そのあとで* `gdb.attach()` でアタッチできるなら、
+この問題は避けられます。
 
-### Environment Variable Ordering
+### 環境変数の順序
 
-Some exploits may require that certain environment variables are in a specific
-order.  Python2 dictionaries are not ordered, which may exacerbate this issue.
+エクスプロイトによっては、特定の環境変数が特定の順序で並んでいる必要があります。
+Python2 の辞書には順序がないので、この問題が悪化することがあります。
 
-In order to have your environment variables in a specific order, we recommend
-using Python3 (which orders dictionaries based on insertion order), or using
-`collections.OrderedDict`.
+環境変数を特定の順序に並べるには、Python3 (辞書が挿入順に並ぶ) を使うか、
+`collections.OrderedDict` を使うことをお勧めします。
 
-## Unable to Attach to Processes
+<a id="unable-to-attach-to-processes"></a>
+## プロセスにアタッチできない場合
 
-Modern Linux systems have a setting called `ptrace_scope` which prevents processes
-that are not child processes from being debugged.  Pwntools works around this
-for any processes that it launches itself, but if you have to launch a process
-outside of Pwntools and try to attach to it by pid (e.g. `gdb.attach(1234)`),
-you may be prevented from attaching.
+最近の Linux システムには `ptrace_scope` という設定があり、子プロセスでないプロセスを
+デバッグできないようにしています。Pwntools が自分で起動したプロセスについては
+これを回避していますが、Pwntools の外でプロセスを起動し、PID を指定して
+アタッチしようとすると (たとえば `gdb.attach(1234)`)、アタッチできないことがあります。
 
-You can resolve this by disabling the security setting and rebooting your machine:
+セキュリティ設定を無効にしてマシンを再起動すれば解決できます。
 
 ```sh
 sudo tee /etc/sysctl.d/10-ptrace.conf <<EOF
@@ -272,14 +280,15 @@ kernel.yama.ptrace_scope = 0
 EOF
 ```
 
-## argv0 and argc==0
+<a id="argv0-and-argc0"></a>
+## argv0 と argc==0
 
-Some challenges require that they are launched with `argv[0]` set to a specific
-value, or even that it's NULL (i.e. `argc==0`).
+問題によっては、`argv[0]` を特定の値にして起動する必要があったり、
+NULL (つまり `argc==0`) にする必要があったりします。
 
-Since version 4.13.0, Pwntools supports launching binaries under gdb while
-modifying or omitting `argv[0]`. The `args` can be set to anything as long
-as you specify the binary to launch in the `exe` parameter.
+バージョン 4.13.0 以降、Pwntools は `argv[0]` を変更または省略した状態で、
+gdb の下でバイナリを起動できます。`exe` パラメータで起動するバイナリを
+指定すれば、`args` には何でも設定できます。
 
 ```py
 >>> io = gdb.debug(args=[b'\xde\xad\xbe\xef'], gdbscript='continue', exe='/bin/sh')
@@ -290,13 +299,13 @@ as you specify the binary to launch in the `exe` parameter.
 00000005
 ```
 
-It's possible to omit all `args` too to have `argc==0` but beware that the Linux
-kernel [prevents processes from having an empty argv since version 5.18](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=dcd46d897adb70d63e025f175a00a89797d31a43)
-in [reaction to a vulnerability](https://lwn.net/Articles/882799/).
+`args` をすべて省略して `argc==0` にすることもできますが、Linux カーネルは
+[バージョン 5.18 以降、argv が空のプロセスを禁止している](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=dcd46d897adb70d63e025f175a00a89797d31a43)
+ことに注意してください。これは[脆弱性への対応](https://lwn.net/Articles/882799/)として行われました。
 
 ```py
 >>> io = gdb.debug([], stdin=PTY, gdbscript='continue', exe=sys.executable)
 >>> io.sendlineafter(b'>>> ', b'import sys; print(sys.argv)')
 >>> io.recvline()
-b"[]\n"  # a patched kernel would show b"['']\n"
+b"[]\n"  # パッチ適用済みのカーネルでは b"['']\n" と表示される
 ```

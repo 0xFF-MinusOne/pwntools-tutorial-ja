@@ -1,22 +1,24 @@
-Table of Contents
-=================
+目次
+=====
 
-  * [Logging](#logging)
-  	* [Functions](#functions)
-    * [Command Line](#command-line)
-    * [Context](#context)
+  * [ログ出力](#logging)
+  	* [関数](#functions)
+    * [コマンドライン](#command-line)
+    * [コンテキスト](#context)
     * [Tubes](#tubes)
-    * [Scoped](#scoped)
+    * [スコープ指定](#scoped)
 
-# Logging
+<a id="logging"></a>
+# ログ出力 (Logging)
 
-Pwntools has a rich internal debugging system, available for your own debugging
-as well as figuring out what's happening behind-the-scenes in Pwntools
+Pwntools には、豊富な内部デバッグの仕組みがあります。自分のデバッグにも、
+Pwntools の裏側で何が起きているかを調べるのにも使えます。
 
-## Functions
+<a id="functions"></a>
+## 関数
 
-The logging functionality is exposed when you import `from pwn import *`.
-This exposes these routines:
+`from pwn import *` でインポートすると、ログ出力の機能が使えるようになります。
+次のルーチンが公開されます。
 
 * `error`
 * `warn`
@@ -33,32 +35,33 @@ For example:
 >>> debug('Debug!')
 ```
 
-Note that the last line is not shown by default, since the default log-level
-is "info".
+既定のログレベルが "info" のため、最後の行は既定では表示されないことに注意してください。
 
-You can use these in your exploit scripts instead of `print` which lets
-you dial in the exact amount of debugging information you see.
+エクスプロイトのスクリプトでは、`print` の代わりにこれらを使えます。そうすると、
+表示するデバッグ情報の量を細かく調整できます。
 
-You can control which log messages are visible in a variety of ways,
-all which are explained below.
+どのログメッセージを表示するかは、さまざまな方法で制御できます。
+すべて以下で説明します。
 
-## Command Line
+<a id="command-line"></a>
+## コマンドライン
 
-The easiest way to turn on the maximum amount of logging verbosity is to
-run your script with the magic argument `DEBUG`, e.g.
+ログを最も詳細にするいちばん簡単な方法は、
+`DEBUG` という特別な引数を付けてスクリプトを実行することです。たとえば次のようにします。
 
 ```
 $ python exploit.py DEBUG
 ```
 
-This is useful for seeing the exact bytes being sent / received, and things
-that are happening internal to pwntools to make your exploit work.
+これは、送受信される正確なバイト列や、エクスプロイトを動かすために
+pwntools の内部で起きていることを見るのに便利です。
 
-## Context
+<a id="context"></a>
+## コンテキスト
 
-You can also set the logging verbosity via `context.log_level`, in the same way
-that you set e.g. the target architecture.
-This controls all logging statements in the same way as on the command-line.
+ログの詳細度は `context.log_level` でも設定できます。これは、対象のアーキテクチャなどを
+設定するのと同じ方法です。
+コマンドラインの場合と同じように、すべてのログ出力文を制御します。
 
 ```py
 >>> context.log_level = 'debug'
@@ -66,8 +69,8 @@ This controls all logging statements in the same way as on the command-line.
 
 ### `log_console`
 
-By default, all logs go to STDOUT.  If you want to change this to a different file, 
-e.g. STDERR, you can do this with the `log_console` setting.
+既定では、すべてのログは STDOUT に出力されます。これを別のファイル、
+たとえば STDERR に変更したい場合は、`log_console` の設定で変更できます。
 
 ```py
 >>> context.log_console = sys.stderr
@@ -75,17 +78,18 @@ e.g. STDERR, you can do this with the `log_console` setting.
 
 ### `log_file`
 
-Sometimes you want your logs to go to a specific file, e.g. `log.txt`, to look at later.
-You can add a log file by setting `context.log_file`.
+あとで見返すために、ログを `log.txt` のような特定のファイルに出力したいことがあります。
+`context.log_file` を設定すると、ログファイルを追加できます。
 
 ```py
 >>> context.log_file = './log.txt'
 ```
 
+<a id="tubes"></a>
 ## Tubes
 
-Each tube can have its logging verbosity controlled individually, when it is created.
-Simply pass `level='...'` to the construction of the object.
+各 tube は、作成時にログの詳細度を個別に制御できます。
+オブジェクトを作るときに `level='...'` を渡すだけです。
 
 ```py
 >>> io = process('sh', level='debug')
@@ -100,11 +104,10 @@ Simply pass `level='...'` to the construction of the object.
 b'hello\n'
 ```
 
-This works for all of the tubes (`process`, `remote`, etc), and also works for 
-tube-like things (e.g. `gdb.attach` and `gdb.debug`) as well as many other 
-routines.
+これはすべての tube (`process`、`remote` など) で使えます。tube に似たもの
+(`gdb.attach` や `gdb.debug` など) や、そのほか多くのルーチンでも使えます。
 
-For example, if you want to see *exactly* how some shellcode is assembled:
+たとえば、あるシェルコードが*具体的に*どうアセンブルされるかを見たい場合は、次のようにします。
 
 ```py
 >>> asm('nop', log_level='debug')
@@ -122,14 +125,15 @@ For example, if you want to see *exactly* how some shellcode is assembled:
 b'\x90'
 ```
 
-## Scoped
+<a id="scoped"></a>
+## スコープ指定
 
-Sometimes you want ALL the logs to be enabled, but only for part of an exploit script.
-You can manually toggle `context.log_level`, or you can use a scoped helper.
+すべてのログを有効にしたいけれど、エクスプロイトのスクリプトの一部だけに限りたい、ということがあります。
+`context.log_level` を手動で切り替えることもできますし、スコープ付きのヘルパーを使うこともできます。
 
 ```py
 io = process(...)
 with context.local(log_level='debug'):
-	# Things inside the 'with' block are logged verbosely
+	# 'with' ブロックの中の処理は詳細にログ出力される
 	io.recvall()
 ```

@@ -1,48 +1,51 @@
-Table of Contents
+目次
 =================
 
-  * [Background](#background)
-  * [Loading an ELF](#loading-an-elf)
-  	* [Fixing Addresses](#fixing-addresses)
-  * [Inspecting Gadgets](#inspecting-gadgets)
-  * [Viewing All Gadgets](#viewing-all-gadgets)
-  	* [Really viewing *ALL* Gadgets](#really-viewing-all-gadgets)
-  * [Adding Raw Data](#adding-raw-data)
-  * [Dumping ROP stacks](#dumping-rop-stacks)
-  * [Extracting Raw Bytes](#extracting-raw-bytes)
-  * [Calling Functions Magically](#calling-functions-manually)
-  	* [Calling Functions by Name](#calling-functions-by-name)
-  * [Multiple ELFs](#multiple-elfs)
-  * [Getting a shell](#getting-a-shell)
+  * [背景](#background)
+  * [ELF の読み込み](#loading-an-elf)
+  	* [アドレスの修正](#fixing-addresses)
+  * [ガジェットの確認](#inspecting-gadgets)
+  * [すべてのガジェットを表示する](#viewing-all-gadgets)
+  	* [本当に *すべて* のガジェットを表示する](#really-viewing-all-gadgets)
+  * [生データの追加](#adding-raw-data)
+  * [ROP スタックのダンプ](#dumping-rop-stacks)
+  * [生のバイト列の取り出し](#extracting-raw-bytes)
+  * [関数を魔法のように呼び出す](#calling-functions-manually)
+  	* [名前で関数を呼び出す](#calling-functions-by-name)
+  * [複数の ELF](#multiple-elfs)
+  * [シェルの取得](#getting-a-shell)
 
 
-# Background
+<a id="background"></a>
+# 背景
 
-Return-oriented programming (ROP) is a technique for bypassing NX (no-execute, also known as Data Execution Prevention (DEP)).
+リターン指向プログラミング(Return-oriented programming, ROP)は、NX(no-execute。データ実行防止(Data Execution Prevention, DEP)とも呼ばれます)を回避するための手法です。
 
-Pwntools has several features that make ROP exploitation simpler, but only works on i386 and amd64 architectures.
+Pwntools には ROP を使ったエクスプロイトを簡単にする機能がいくつかありますが、i386 と amd64 アーキテクチャでのみ動作します。
 
-# Loading an ELF
+<a id="loading-an-elf"></a>
+# ELF の読み込み
 
-To create a `ROP` object, just pass it an `ELF` file.
+`ROP` オブジェクトを作るには、`ELF` ファイルを渡すだけです。
 
 ```py
 elf = ELF('/bin/sh')
 rop = ROP(elf)
 ```
 
-This will automatically load the binary, and extract most simple gadgets from it.  For example, if you want to load the `rbx` register:
+これでバイナリが自動的に読み込まれ、ほとんどの単純なガジェット(gadget)が抽出されます。たとえば、`rbx` レジスタに値を読み込みたい場合は次のようにします。
 
 ```py
 rop.rbx
 # Gadget(0x5fd5, ['pop rbx', 'ret'], ['rbx'], 0x8)
 ```
 
-## Fixing Addresses
+<a id="fixing-addresses"></a>
+## アドレスの修正
 
-Here we can see the address of the gadget, the contents of its disassembly, what register it loads, and by how much the stack is adjusted when the gadget is executed.
+ここでは、ガジェットのアドレス、その逆アセンブル結果、どのレジスタを読み込むか、そしてガジェットの実行時にスタックがどれだけ調整されるかを確認できます。
 
-Since in our example, `/bin/sh` is position-independent (i.e. uses ASLR), we can adjust the load address on the ELF object first.
+この例の `/bin/sh` は位置独立(position-independent)である(つまり ASLR が効く)ため、まず ELF オブジェクトのロードアドレスを調整できます。
 
 ```py
 elf.address = 0xff000000
@@ -51,25 +54,27 @@ rop.rbx
 # Gadget(0xff005fd5, ['pop rbx', 'ret'], ['rbx'], 0x8)
 ```
 
-# Inspecting Gadgets
+<a id="inspecting-gadgets"></a>
+# ガジェットの確認
 
-You can ask the ROP object how to load any register you want, through magic accessors.  We used `rbx` above, but we can also look for other registers.
+マジックアクセサ(magic accessor)を通じて、好きなレジスタをどう読み込めばよいかを ROP オブジェクトに尋ねられます。上では `rbx` を使いましたが、ほかのレジスタも探せます。
 
 ```py
 rop.rbx
 # Gadget(0xff005fd5, ['pop rbx', 'ret'], ['rbx'], 0x8)
 ```
 
-If the register cannot be loaded, the return value is `None`.  In our example, there are no `pop rcx; ret` gadgets for example.
+レジスタを読み込めない場合、戻り値は `None` です。この例では、たとえば `pop rcx; ret` というガジェットは存在しません。
 
 ```py
 rop.rcx
 # None
 ```
 
-## Viewing All Gadgets
+<a id="viewing-all-gadgets"></a>
+## すべてのガジェットを表示する
 
-Pwntools intentionally excludes most non-trivial gadgets, but you can see a list of what it has loaded by looking at the `ROP.gadgets` property, which maps the address of  a gadget to the gadget itself.
+Pwntools は、単純でないガジェットの大半を意図的に除外しています。ただし、`ROP.gadgets` プロパティを見れば、読み込まれたガジェットの一覧を確認できます。これはガジェットのアドレスをガジェット自体に対応付けたものです。
 
 ```py
 rop.gadgets
@@ -85,13 +90,15 @@ rop.gadgets
 #  4278210586: Gadget(0xff00501a, ['ret'], [], 0x4)}
 ```
 
-## Really Viewing *ALL* Gadgets
+<a id="really-viewing-all-gadgets"></a>
+## 本当に *すべて* のガジェットを表示する
 
- Pwntools ROP filters out non-trivial gadgets, so if it doesn't have something you want, we recommend using ROPGadget to inspect the binary.
+ Pwntools の ROP は単純でないガジェットを除外します。欲しいものが見つからない場合は、ROPGadget を使ってバイナリを調べることをお勧めします。
 
-# Adding Raw Data
+<a id="adding-raw-data"></a>
+# 生データの追加
 
-In order to add raw data to the ROP stack, simply call `ROP.raw()`.
+ROP スタックに生のデータを追加するには、`ROP.raw()` を呼び出すだけです。
 
 ```py
 rop.raw(0xdeadbeef)
@@ -99,9 +106,10 @@ rop.raw(0xcafebabe)
 rop.raw('asdf')
 ```
 
-# Dumping ROP stacks
+<a id="dumping-rop-stacks"></a>
+# ROP スタックのダンプ
 
-Now that we have some gadgets, let's look at what's on the ROP stack:
+いくつかガジェットが揃ったので、ROP スタックの中身を見てみましょう。
 
 ```py
 print(rop.dump())
@@ -110,9 +118,10 @@ print(rop.dump())
 # 0x0008:          b'asdf' 'asdf'
 ```
 
-# Extracting the Raw Bytes
+<a id="extracting-raw-bytes"></a>
+# 生のバイト列の取り出し
 
-Now that we have a ROP stack, we want the raw bytes out of it.  Use the `bytes()` method  to do this.
+ROP スタックができたので、そこから生のバイト列を取り出したいところです。これには `bytes()` メソッドを使います。
 
 ```py
 print(hexdump(bytes(rop)))
@@ -120,9 +129,10 @@ print(hexdump(bytes(rop)))
 # 0000000c
 ```
 
-# Calling Functions Magically
+<a id="calling-functions-manually"></a>
+# 関数を魔法のように呼び出す
 
-The real power of Pwntools' ROP tooling is the ability to invoke arbitrary functions, either via magic accessors or via the `ROP.call()` routine.
+Pwntools の ROP ツールの真価は、マジックアクセサまたは `ROP.call()` ルーチンを通じて任意の関数を呼び出せることです。
 
 ```py
 elf = ELF('/bin/sh')
@@ -135,7 +145,7 @@ print(rop.dump())
 # 0x000c:              0x1 arg1
 ```
 
-Notice here that it's using a 32-bit ABI, which is not correct.  We can also do ROP against 64-bit binaries, but we need to set `context.arch` accordingly.  We can use `context.binary` to do this automagically.
+ここでは 32 ビットの ABI が使われていますが、これは正しくありません。64 ビットのバイナリに対しても ROP はできますが、それに合わせて `context.arch` を設定する必要があります。`context.binary` を使えば、これを自動的に行えます。
 
 ```py
 context.binary = elf = ELF('/bin/sh')
@@ -149,9 +159,10 @@ print(rop.dump())
 # 0x0020:       0xdeadbeef
 ```
 
-# Calling Functions by Name
+<a id="calling-functions-by-name"></a>
+# 名前で関数を呼び出す
 
-If your library has a function you want to call in its GOT/PLT, or there are symbols for the binary, you can invoke function names directly.
+ライブラリの GOT/PLT に呼び出したい関数がある場合や、バイナリにシンボルがある場合は、関数名を直接指定して呼び出せます。
 
 ```py
 context.binary = elf = ELF('/bin/sh')
@@ -163,9 +174,10 @@ print(rop.dump())
 # 0x0010:           0x5824 execve
 ```
 
-# Multiple ELFs
+<a id="multiple-elfs"></a>
+# 複数の ELF
 
-Generally, more than one ELF is available in the address space of your process at a time.  Let's look at an example that uses `/bin/sh` as well as its `libc`.  Originally, we looked at `rop.rcx` and it was `None`, since there is no `pop rcx; ret` gadget in bash.  However, now we have all of the gadgets from `libc` available as well.
+通常、プロセスのアドレス空間には同時に複数の ELF が存在します。`/bin/sh` とその `libc` を使う例を見てみましょう。最初に `rop.rcx` を見たときは `None` でした。bash には `pop rcx; ret` というガジェットがないためです。しかし今回は、`libc` のガジェットもすべて使えます。
 
 ```py
 context.binary = elf = ELF('/bin/sh')
@@ -184,9 +196,9 @@ rop.rdx
 # Gadget(0xbb117960, ['pop rdx', 'add rsp, 0x38', 'ret'], ['rdx'], 0x48)
 ```
 
-Notice how the `rax` and `rbx` gadgets are in the main binary (0xAA...) while the second two are in libc (0xBB...).
+`rax` と `rbx` のガジェットはメインのバイナリ(0xAA...)にあり、後の 2 つは libc(0xBB...)にあることに注目してください。
 
-Now let's do a more complex call!
+では、もう少し複雑な呼び出しをしてみましょう。
 
 ```py
 rop.memcpy(0xaaaaaaaa, 0xbbbbbbbb, 0xcccccccc)
@@ -201,11 +213,12 @@ print(rop.dump())
 # 0x0038:       0xaa0058a4 memcpy
 ```
 
-Note that Pwntools was able to use the `pop rdx; pop r12; ret` gadget, and account for the extra value needed on the stack.   Also note that the symbolic value of each item is listen  in `rop.dump()`.  For  example, it shows that we are settings rdx=3435973836.
+Pwntools は `pop rdx; pop r12; ret` ガジェットを使い、スタックに必要な余分な値も考慮できていることに注意してください。また、各項目の記号的な値が `rop.dump()` に表示されている点にも注目してください。たとえば、rdx=3435973836 を設定していることがわかります。
 
-# Getting a shell
+<a id="getting-a-shell"></a>
+# シェルの取得
 
-Sometimes, getting a shell can be pretty easy!  Let's call `execve` directly, and find an instance of `"/bin/sh\x00"` to pass as the first argument from somewhere within memory.
+シェルの取得は、意外と簡単な場合もあります。`execve` を直接呼び出し、メモリ内のどこかから `"/bin/sh\x00"` を見つけて第 1 引数として渡しましょう。
 
 ```py
 context.binary = elf = ELF('/bin/sh')
@@ -220,7 +233,7 @@ binsh = next(libc.search(b"/bin/sh\x00"))
 rop.execve(binsh, 0, 0)
 ```
 
-Show our ROP stack
+ROP スタックを表示します。
 
 ```py
 print(rop.dump())
@@ -234,7 +247,7 @@ print(rop.dump())
 # 0x0038:       0xaa005824 execve
 ```
 
-Extract the raw bytes for the ROP
+ROP の生のバイト列を取り出します。
 
 ```py
 print(hexdump(bytes(rop)))

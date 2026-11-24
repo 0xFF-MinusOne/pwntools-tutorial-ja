@@ -1,6 +1,6 @@
-# Bytes vs. Strings
+# バイト列と文字列
 
-When Pwntools was originally (re-)written, about a decade ago, Python2 was the bee's knees.
+Pwntools が (書き直されて) 最初に作られた約 10 年前、Python2 は最高の選択肢でした。
 
 ```
 commit e692277db8533eaf62dd3d2072144ccf0f673b2e
@@ -10,23 +10,23 @@ Date:   Thu Jun 7 17:34:48 2012 +0200
     ALL THE THINGS
 ```
 
-Many exploits written over the years in Python assume that a `str` object has a 1:1 mapping with a `bytes` object, because this is How Things Work™️ on Python2.  In this section, we discuss some of the changes necessary to write exploits on Python3, versus their Python2 counterparts.
+長年にわたって Python で書かれてきた多くのエクスプロイトは、`str` オブジェクトと `bytes` オブジェクトが 1 対 1 に対応することを前提にしています。Python2 では、それが当たり前だったからです。この節では、Python3 でエクスプロイトを書くときに、Python2 から変える必要のある点をいくつか説明します。
 
 ## Python2
 
-In Python2, the class `str` is literally the same class as `bytes`, and there is a 1:1 mapping.  There is never a need to call `encode` or `decode` on anything -- text is bytes, bytes are text.
+Python2 では、クラス `str` は文字通り `bytes` と同じクラスで、1 対 1 に対応しています。何かに `encode` や `decode` を呼ぶ必要は一切ありません。テキストはバイト列であり、バイト列はテキストです。
 
-This is incredibly convenient for writing exploits, since you can just write `"\x90\x90\x90\x90"` to get a NOP sled.  All of Pwntools tubes and data manipulation on Python2 support either strings or bytes.
+NOP スレッドが欲しければ `"\x90\x90\x90\x90"` と書くだけでよいので、エクスプロイトを書くには非常に便利です。Python2 では、Pwntools のすべての tubes とデータ操作が、文字列とバイト列のどちらにも対応しています。
 
-Nobody ever used `unicode` objects to write exploits, so unicode-to-bytes transformations were extremely rare.
+エクスプロイトを書くのに `unicode` オブジェクトを使う人はいなかったので、unicode からバイト列への変換はごくまれでした。
 
 ## Python3
 
-In Python3, the `unicode` class is effectively the `str` class.  This has a few immediate and obvious ramifications.
+Python3 では、`unicode` クラスが実質的に `str` クラスです。このことは、すぐに分かる明らかな影響をいくつかもたらします。
 
-At first glance, Python3 seems to make things harder, because `bytes` declares individual octets (as the name `bytes` implies) while `str` is used for any text-based representation of data.
+一見すると、Python3 は物事を難しくしているように見えます。`bytes` は (名前が示すとおり) 個々のオクテットを表し、`str` はテキストとしてのデータ表現全般に使われるからです。
 
-Pwntools goes through great lengths to follow the "principle of least surprise" -- that is, things behave the way you expect them to.
+Pwntools は「最小驚きの原則」、つまり物事が期待どおりに動くことを守るために、大変な労力をかけています。
 
 ```
 >>> r.send('❤️')
@@ -39,7 +39,7 @@ Pwntools goes through great lengths to follow the "principle of least surprise" 
     00000007
 ```
 
-However, sometimes things break down a bit.  Note here how 99f7e2 gets converted to c299c3b7c3a2.
+しかし、ときどき少しうまくいかなくなります。ここで、99f7e2 が c299c3b7c3a2 に変換されている点に注目してください。
 
 ```
 >>> shellcode = "\x99\xf7\xe2"
@@ -48,9 +48,9 @@ However, sometimes things break down a bit.  Note here how 99f7e2 gets converted
 0000000e
 ```
 
-This happens because the text-string "\x99\xf7\xe2" is automatically converted to UTF-8 code points.  This is not likely what the author wanted.  
+これは、テキスト文字列 "\x99\xf7\xe2" が自動的に UTF-8 のコードポイントに変換されるために起こります。書いた人が望んだ結果ではないでしょう。
 
-Consider instead, with a `b` prefix:
+代わりに、`b` プレフィックスを付けてみましょう。
 
 ```
 >>> shellcode = b"\x99\xf7\xe2"
@@ -59,13 +59,13 @@ Consider instead, with a `b` prefix:
 0000000b
 ```
 
-Much better!
+ずっと良くなりました。
 
-Generally, the fix for things in Pwntools on Python3 is to make sure all of your strings have a `b` prefix.  This resolves ambiguities and makes everything straightforward.
+一般に、Python3 上の Pwntools での対処は、すべての文字列に `b` プレフィックスを付けることです。これであいまいさがなくなり、すべてが分かりやすくなります。
 
-### Gotchas
+### 落とし穴
 
-There is one "gotcha" worth mentioning about Python3 `bytes` objects.  When iterating over them, you get integers, instead of `bytes` objects.  This is a huge diversion from Python2, and a major annoyance.
+Python3 の `bytes` オブジェクトには、触れておく価値のある「落とし穴」がひとつあります。それを反復処理すると、`bytes` オブジェクトではなく整数が得られます。これは Python2 から大きく外れた挙動で、大きな悩みの種です。
 
 ```
 >>> x=b'123'
@@ -77,7 +77,7 @@ There is one "gotcha" worth mentioning about Python3 `bytes` objects.  When iter
 51
 ```
 
-To work around this, we suggest using slices, which produce length-1 `bytes` objects.
+これを回避するには、長さ 1 の `bytes` オブジェクトを返すスライスを使うことをお勧めします。
 
 ```
 >>> for i in range(len(x)):

@@ -1,8 +1,8 @@
-Table of Contents
-=================
+目次
+=====
 
-  * [Context](#context)
-    * [Context Settings](#context-settings)
+  * [コンテキスト (Context)](#context)
+    * [コンテキストの設定](#context-settings)
       * [arch](#arch)
       * [bits](#bits)
       * [binary](#binary)
@@ -14,59 +14,61 @@ Table of Contents
       * [timeout](#timeout)
       * [update](#update)
 
-# Context
+<a id="context"></a>
+# コンテキスト (Context)
 
-The `context` object is a global, thread-aware object which contains various settins used by `pwntools`.
+`context` オブジェクトは、スレッドを考慮したグローバルなオブジェクトで、`pwntools` が使うさまざまな設定を保持しています。
 
-Generally at the top of an exploit, you'll find something like:
+たいていのエクスプロイトの冒頭には、次のようなコードがあります。
 
 ```py
 from pwn import *
 context.arch = 'amd64'
 ```
 
-Which informs pwntools that shellcode generated will be for `amd64`, and that the default word size is 64 bits
+これは、生成するシェルコードが `amd64` 向けであること、既定のワードサイズが 64 ビットであることを pwntools に伝えます。
 
-## Context Settings
+<a id="context-settings"></a>
+## コンテキストの設定
 
 ### arch
 
-The target architecture.  Valid values are `"aarch64"`, `"arm"`, `"i386"`, `"amd64"`, etc.  The default is `"i386"`.
+対象のアーキテクチャです。有効な値は `"aarch64"`、`"arm"`、`"i386"`、`"amd64"` などです。既定値は `"i386"` です。
 
-The first time this is set, it automatically sets the default `context.bits` and `context.endian` to the most likely values.
+最初にこれを設定したとき、`context.bits` と `context.endian` の既定値が、もっともありそうな値に自動で設定されます。
 
 ### bits
 
-How many bits make up a word in the target binary, e.g. 32 or 64.
+対象のバイナリで 1 ワードが何ビットかを表します。たとえば 32 や 64 です。
 
 ### binary
 
-Absorb settings from an ELF file.  For example, `context.binary='/bin/sh'`.
+ELF ファイルから設定を取り込みます。たとえば `context.binary='/bin/sh'` のように使います。
 
 ### endian
 
-Set to `"big"` or `"little"` (the default) as needed.
+必要に応じて `"big"` か `"little"` (既定値) を設定します。
 
 ### log_file
 
-File to send all of the logging output into.
+すべてのログ出力の送り先ファイルです。
 
 ### log_level
 
-Verbosity of logs.  Valid values are integers (lower is more verbose), and string values like `"debug"`, `"info"`, and `"error"`.
+ログの詳細度です。有効な値は整数 (小さいほど詳細) と、`"debug"`、`"info"`、`"error"` のような文字列です。
 
 ### sign
 
-Sets the default signed-ness of integer packing / unpacking.  Default is `"unsigned"`.
+整数のパック / アンパックにおける符号の有無の既定値を設定します。既定値は `"unsigned"` です。
 
 ### terminal
 
-Preferred terminal program to open new windows with.  By default, uses `x-terminal-emulator` or `tmux`.
+新しいウィンドウを開くときに使う端末プログラムです。既定では `x-terminal-emulator` か `tmux` を使います。
 
 ### timeout
 
-Default timeout for tube operations.
+tube の操作に対する既定のタイムアウトです。
 
 ### update
 
-Sets multiple values at once, e.g. `context.update(arch='mips', bits=64, endian='big')`.
+複数の値を一度に設定します。たとえば `context.update(arch='mips', bits=64, endian='big')` です。

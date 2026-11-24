@@ -1,12 +1,12 @@
-# shellcode
+# シェルコード
 
-**Note**: You should check out the [basic shellcode tutorial first](../shellcode-basic/README.md)!
+**注意**: まず[基本のシェルコードチュートリアル](../shellcode-basic/README.md)を確認してください。
 
-Now that you've seen all of the tools available to you on the command-line, it's easy to learn about their Python counterparts.
+コマンドラインで使えるツールをひととおり見たので、それに対応する Python 版を学ぶのは簡単です。
 
 ## `asm`
 
-The `asm` tool works pretty much the same way.
+`asm` ツールは、ほぼ同じように動きます。
 
 ```python
 from pwn import *
@@ -15,7 +15,7 @@ nop = asm('nop')
 arm_nop = asm('nop', arch='arm')
 ```
 
-Like most other things in Pwntools, it's aware of the settings in `context`.
+Pwntools のほかの多くの機能と同様に、`context` の設定を認識します。
 
 ```python
 context.arch = 'powerpc'
@@ -24,7 +24,7 @@ powerpc_nop = asm('nop')
 
 ## `disasm`
 
-The `disasm` tool also works pretty much the same way.
+`disasm` ツールも、ほぼ同じように動きます。
 
 ```python
 from pwn import *
@@ -38,9 +38,9 @@ print disasm('\xff\x00\x40\xe3', arch='arm')
 
 ## `shellcraft`
 
-The shellcraft module also works pretty much the same way.  By default, the `shellcraft` module uses the currently-active OS and architecture from the `context` settings.
+shellcraft モジュールも、ほぼ同じように動きます。デフォルトでは、`shellcraft` モジュールは `context` の設定で現在有効な OS とアーキテクチャを使います。
 
-Alternately, you can directly invoke a specific template by its full path.
+あるいは、完全なパスを指定して特定のテンプレートを直接呼び出すこともできます。
 
 ```python
 from pwn import *
@@ -69,11 +69,11 @@ context.arch = 'arm'
 # bin_sh: .asciz "/bin/sh"
 
 
-# Can also be explicitly invoked directly by path.
+# パスを指定して直接呼び出すこともできます。
 print shellcraft.i386.linux.sh()
 ```
 
-Functions which take arguments work exactly like normal functions.
+引数を取る関数は、通常の関数とまったく同じように動作します。
 
 ```python
 from pwn import *

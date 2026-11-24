@@ -1,66 +1,68 @@
-# Pwntools Tutorials
+> これは [Gallopsled/pwntools-tutorial](https://github.com/Gallopsled/pwntools-tutorial) の日本語訳です。原著のライセンス (MIT) に従います。著作権表示は LICENSE にあります。訳したのは説明文と、コード内のコメントです。コードは原著のままです。
 
-This repository contains some basic tutorials for getting started with pwntools (and pwntools).
+# Pwntools チュートリアル
 
-These tutorials do not make any effort to explain reverse engineering or exploitation primitives, but assume this knowledge.
+このリポジトリには、pwntools を使い始めるための基本的なチュートリアルが入っています。
 
-# Introduction
+これらのチュートリアルは、リバースエンジニアリングやエクスプロイトの基本要素については説明しません。その知識があることを前提としています。
 
-[`Pwntools`](https://pwntools.com) is a grab-bag of tools to make exploitation during CTFs as painless as possible, and to make exploits as easy to read as possible.
+# はじめに
 
-There are bits of code everyone has written a million times, and everyone has their own way of doing it.  Pwntools aims to provide all of these in a semi-standard way, so that you can stop copy-pasting the same `struct.unpack('>I', x)` code around and instead use more slightly more legible wrappers like `pack` or `p32` or even `p64(..., endian='big', sign=True)`.
+[`Pwntools`](https://pwntools.com) は、CTF でのエクスプロイトをできるだけ楽にし、エクスプロイトのコードをできるだけ読みやすくするための道具の詰め合わせです。
 
-Aside from convenience wrappers around mundane functionality, it also provides a very rich set of `tubes` which wrap all of the IO that you'll ever perform in a single, unifying interface.  Switching from a local exploit to a remote exploit, or local exploit over SSH becomes a one-line change.
+誰もが何度も書いてきた定番のコードがあり、書き方は人それぞれです。Pwntools は、そうしたものをおおむね標準的な形で提供することを目指しています。同じ `struct.unpack('>I', x)` というコードをあちこちにコピー&ペーストする代わりに、`pack` や `p32`、さらには `p64(..., endian='big', sign=True)` のような、少し読みやすいラッパーを使えます。
 
-Last but not least, it also includes a wide array of exploitation assistance tools for intermediate-to-advanced use cases.  These include remote symbol resolution given a memory disclosure primitive (`MemLeak` and `DynELF`), ELF parsing and patching (`ELF`), and ROP gadget discovery and call-chain building (`ROP`).
+ありふれた処理の便利なラッパーに加えて、非常に豊富な `tubes` も備えています。これは、行うことになるあらゆる入出力を、ひとつの統一されたインターフェースで包んだものです。ローカルのエクスプロイトからリモートのエクスプロイトへ、あるいは SSH 経由のローカルのエクスプロイトへの切り替えは、1 行の変更で済みます。
 
-# Table of Contents
+最後になりますが、中級から上級の用途向けに、エクスプロイトを支援する幅広いツールも含まれています。たとえば、メモリ漏洩 (memory disclosure) の手段を使ったリモートのシンボル解決 (`MemLeak` と `DynELF`)、ELF の解析とパッチ当て (`ELF`)、ROP ガジェットの探索とコールチェーンの構築 (`ROP`) があります。
 
-- [Installing Pwntools](installing.md)
+# 目次
+
+- [Pwntools のインストール](installing.md)
 - [Tubes](tubes.md)
-    + Basic Tubes
-    + Interactive Shells
-    + Processes
-    + Networking
+    + 基本的な Tubes
+    + 対話型シェル
+    + プロセス
+    + ネットワーク
     + Secure Shell
-    + Serial Ports
-- [Utility](utility.md)
-    + Encoding and Hashing
-    + Packing / unpacking integers
-    + Pattern generation
-    + Safe evaluation
-- [Bytes vs. Strings](bytes.md)
+    + シリアルポート
+- [ユーティリティ](utility.md)
+    + エンコードとハッシュ
+    + 整数のパック / アンパック
+    + パターンの生成
+    + 安全な評価
+- [バイト列と文字列](bytes.md)
     + Python2
     - Python3
-        + Gotchas
-- [Context](context.md)
-    + Architecture
-    + Endianness
-    + Log verbosity
-    + Timeout
-- [ELFs](elf.md)
-    + Reading and writing
-    + Patching
-    + Symbols
-- [Assembly](assembly.md)
-    + Assembling shellcode
-    + Disassembling bytes
-    + Shellcraft library
-    + Constants
-- [Debugging](debugging.md)
-    + Debugging local processes
-    + Breaking at the entry point
-    + Debugging shellcode
+        + 落とし穴
+- [コンテキスト (Context)](context.md)
+    + アーキテクチャ
+    + エンディアン
+    + ログの詳細度
+    + タイムアウト
+- [ELF](elf.md)
+    + 読み書き
+    + パッチ当て
+    + シンボル
+- [アセンブリ](assembly.md)
+    + シェルコードのアセンブル
+    + バイト列の逆アセンブル
+    + Shellcraft ライブラリ
+    + 定数
+- [デバッグ](debugging.md)
+    + ローカルプロセスのデバッグ
+    + エントリポイントで停止する
+    + シェルコードのデバッグ
 - [ROP](rop.md)
-    + Dumping gadgets
-    + Searching for gadgets
-    + ROP stack generation
-    + Helper functions
-- [Logging](logging.md)
-    + Basic logging
-    + Log verbosity
-    + Progress spinners
-- [Leaking Remote Memory](leaking.md)
-    + Declaring a leak function
-    + Leaking arbitrary memory
-    + Remote symbol resolution
+    + ガジェットのダンプ
+    + ガジェットの検索
+    + ROP スタックの生成
+    + ヘルパー関数
+- [ログ出力](logging.md)
+    + 基本的なログ出力
+    + ログの詳細度
+    + 進捗スピナー
+- [リモートメモリの漏洩](leaking.md)
+    + 漏洩関数の宣言
+    + 任意のメモリの漏洩
+    + リモートのシンボル解決

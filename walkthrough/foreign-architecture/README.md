@@ -1,12 +1,12 @@
-# Foreign Architecture
+# 異なるアーキテクチャ
 
-This example is the exact same as the Basic Buffer Overflow example, but demonstrates how to interact with foreign-architecture binaries.
+この例は「基本的なバッファオーバーフロー」の例とまったく同じですが、異なるアーキテクチャ(foreign architecture)のバイナリを扱う方法を示します。
 
-In order for all of this to work, you'll need some cross-architecture libraries installed.  FOr this example, we'll use ARM as it's easy to get the dependencies on Ubuntu.
+これをすべて動かすには、クロスアーキテクチャのライブラリをいくつかインストールする必要があります。この例では、Ubuntu で依存関係を揃えやすい ARM を使います。
 
-Detailed instructions for setting up a foreign-architecture toolchain are available in my [StackExchange post][post].  While the topic is MIPS, the exact same steps apply.
+異なるアーキテクチャのツールチェーンの詳しい設定手順は、私の [StackExchange の投稿][post]にあります。話題は MIPS ですが、手順はまったく同じです。
 
-If you just want the commands and no prose, here you go:
+説明は不要でコマンドだけ欲しい場合は、次のとおりです。
 
 ```sh
 sudo apt-get install qemu qemu-user qemu-user-static

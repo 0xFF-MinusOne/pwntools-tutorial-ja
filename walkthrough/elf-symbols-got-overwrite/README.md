@@ -1,7 +1,7 @@
-# ELF Symbol Lookups and GOT Overwrites
+# ELF シンボルの検索と GOT の上書き
 
-This is a position-independent binary which gives you a module address, and a trivial write-what-where.
+これは位置独立(position-independent)なバイナリで、モジュールのアドレスを教えてくれ、単純な任意アドレス書き込み(write-what-where)ができます。
 
-The exploit demonstrates how to perform symbol lookups in the GOT, PLT, and other exported symbols.  It also shows how to rebase the module when its actual base address is different from the ELF's base address (e.g. PIE).
+このエクスプロイトでは、GOT、PLT、およびその他のエクスポートされたシンボルを検索する方法を示します。また、モジュールの実際のベースアドレスが ELF のベースアドレスと異なる場合(PIE など)に、モジュールをリベースする方法も示します。
 
-Also as an added tip, it demonstrates the `context.binary` field, which not only automatically loads an ELF, but also automagically sets the `context.arch`, `context.bits`, and `context.endianness` variables to the appropriate ones.
+さらにおまけのヒントとして、`context.binary` フィールドも紹介します。これは ELF を自動的に読み込むだけでなく、`context.arch`、`context.bits`、`context.endianness` の各変数も適切な値に自動的に設定してくれます。

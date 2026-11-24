@@ -1,33 +1,33 @@
-# Advanced Shellcode
+# 高度なシェルコード
 
-**Note**: You should check out the [basic](../shellcode-basic/README.md) and [intermediate](../shellcode-intermediate/README.md) tutorial first!
+**注意**: まず[基本](../shellcode-basic/README.md)と[中級](../shellcode-intermediate/README.md)のチュートリアルを確認してください。
 
-In order to build new modules and make them available via `shellcraft`, only a few steps are necessary.
+新しいモジュールを作って `shellcraft` から使えるようにするには、いくつかの手順を踏むだけです。
 
-First, all of the `shellcraft` templates are really just [Mako][mako] templates.  Generally this is used for server-side scripting in Python web servers, but it fits the application of pasting together arbitrary bits of shellcode very well!
+まず、`shellcraft` のテンプレートはすべて、実は [Mako][mako] テンプレートです。通常、Mako は Python の Web サーバーでサーバーサイドのスクリプトに使われますが、任意のシェルコード断片をつなぎ合わせる用途にもよく合います。
 
-The templates are all located in the `pwnlib/shellcraft/templates/ARCH/OS` directories.  For example `$ shellcraft i386.linux.sh` is actually invoking the template defined in [`pwnlib/shellcraft/templates/i386/linux/sh.asm`][sh]
+テンプレートはすべて `pwnlib/shellcraft/templates/ARCH/OS` ディレクトリにあります。たとえば `$ shellcraft i386.linux.sh` は、実際には [`pwnlib/shellcraft/templates/i386/linux/sh.asm`][sh] で定義されたテンプレートを呼び出しています。
 
-## Syntax Highlighting
+## シンタックスハイライト
 
-This generally helps make the templates more readable.  Pwntools has a [syntax highlighting](https://github.com/Gallopsled/pwntools/blob/master/extra/textmate/README.md) plug-in for Sublime Text / TextMate.
+シンタックスハイライトがあると、テンプレートが読みやすくなります。Pwntools には、Sublime Text / TextMate 向けの[シンタックスハイライト](https://github.com/Gallopsled/pwntools/blob/master/extra/textmate/README.md)プラグインがあります。
 
-## Anatomy of a Simple Template
+## 単純なテンプレートの構造
 
-For Pwntools, the general format of a template looks like what's shown below.
-In particular, there are a few things to note about syntax:
+Pwntools のテンプレートの一般的な形式は、以下のとおりです。
+特に、構文について注意すべき点がいくつかあります。
 
-- `<%` and `%>` contain Python code blocks
-- `<%tag>` and `</%tag>` contain special tags defined by Pwntools or Mako
-    + These are used to generate the function wrappers
-- `${...}` is a Python expression
-    - `${var}` is replaced with the Python variable (as passed through `str()` or `%s`)
-    - `${function(...)}` is the same, the return value is inserted in its place
-        + Mako templates just emit a string, this makes it very easy to nest them!
-- Lines starting with `##` are ignored by Mako
-- Everything else is emitted verbatim.
+- `<%` と `%>` は Python のコードブロックを囲みます
+- `<%tag>` と `</%tag>` は、Pwntools または Mako が定義する特別なタグを囲みます
+    + これらは関数ラッパーを生成するために使われます
+- `${...}` は Python の式です
+    - `${var}` は Python の変数に置き換えられます(`str()` または `%s` を通した値になります)
+    - `${function(...)}` も同様で、戻り値がその場所に挿入されます
+        + Mako テンプレートは単に文字列を出力するので、入れ子にするのがとても簡単です。
+- `##` で始まる行は Mako に無視されます
+- それ以外はすべてそのまま出力されます。
 
-After copying the below template to `pwnlib/shellcraft/templates/i386/linux/demo.asm`, it can be invoked from Python or the command-line tool.
+以下のテンプレートを `pwnlib/shellcraft/templates/i386/linux/demo.asm` にコピーすると、Python からでもコマンドラインツールからでも呼び出せます。
 
 ```sh
 $ shellcraft i386.linux.demo 1 hello 1
@@ -39,49 +39,49 @@ $ shellcraft i386.linux.demo 1 hello 1 -f asm | head -n3
 ...
 ```
 
-### Sample Template
+### テンプレートのサンプル
 
 ```
 <%
-# The constants module lets the user provide the string 'SYS_execve',
-# and then we can resolve it to the integer value.
+# constants モジュールを使うと、ユーザーが文字列 'SYS_execve' を渡しても、
+# それを整数値に解決できます。
 #
-# For example, on i386, constants.eval('SYS_execve') == 11
+# たとえば i386 では、constants.eval('SYS_execve') == 11 です。
 from pwnlib import constants
 
-# Pushstr provides a simple way to get a string onto the stack
-# with no NULLs or newlines in the emitted assembly.
+# Pushstr を使うと、出力されるアセンブリに NULL や改行を含めずに、
+# 文字列をスタックに積めます。
 from pwnlib.shellcraft.i386 import pushstr
 
-# Mov provides a simple way to mov values into registers, or
-# between registers, without caring which is occurring.
-# It also is generally NULL- and newline-free.
+# Mov を使うと、どちらの動作になるかを気にせずに、
+# レジスタへ値を、またはレジスタ間で値を mov できます。
+# これも一般に NULL と改行を含みません。
 #
-# This is not a big deal on i386 since it's all the same instruction,
-# but on RISC architectures it's really a requirement.
+# i386 ではどれも同じ命令なので大きな問題ではありませんが、
+# RISC アーキテクチャでは事実上必須です。
 from pwnlib.shellcraft.i386 import mov
 
-# All of the Linux syscalls have a small wrapper template around them.
-# These are in turn a wrapper around the "syscall" template.
-# The syscall template is in turn as wrapper around the "mov" template
-# to move the values into the appropriate registers.
+# Linux のシステムコールにはすべて、小さなラッパーテンプレートがあります。
+# これらは今度は "syscall" テンプレートのラッパーです。
+# syscall テンプレートはさらに "mov" テンプレートのラッパーで、
+# 値を適切なレジスタに移します。
 #
-# Using the "write" syscall wrapper is much more convenient than writing
-# everything out by hand, even if some of the code is duplicated.
+# 一部のコードが重複したとしても、"write" システムコールのラッパーを使うほうが、
+# すべてを手で書き出すよりずっと便利です。
 from pwnlib.shellcraft.i386.linux import write
 
-# The label template provides a way to ensure that all labels are unique.
-# This is important if the same shellcode is included multiple times,
-# which is common for simple loops.
+# label テンプレートを使うと、すべてのラベルが一意になることを保証できます。
+# 同じシェルコードが複数回インクルードされる場合に重要で、
+# 単純なループではよくあることです。
 from pwnlib.shellcraft.common import label
 %>
 
-## The arguments section allows us to specify arguments to the template.
-## These are turned into Python arguments for the Python function wrapper.
+## arguments セクションでは、テンプレートの引数を指定できます。
+## これらは Python の関数ラッパーの引数になります。
 <%page args="sock, message, spin=False"/>
 
-## The docstring is useful and informative for users, but is not required.
-## This is printed out with "shellcraft ... -?".
+## docstring は利用者に役立つ情報になりますが、必須ではありません。
+## これは "shellcraft ... -?" で表示されます。
 <%docstring>
 Sends a message to a file descriptor, and then loops forever!
 
@@ -92,19 +92,19 @@ Arguments:
 
 </%docstring>
 
-## Templates can embed Python logic directly.
-## Any variables or functions created in a block are available
-## immediately in the template.
+## テンプレートには Python のロジックを直接埋め込めます。
+## ブロック内で作った変数や関数は、
+## テンプレート内ですぐに使えます。
 <%
     target = label('target')
 
-    # This is not necessary since we're just passing it into
-    # the 'mov' template, which already does this.
-    # Just for demonstration purposes.
+    # 'mov' テンプレートに渡すだけなので、これは必要ありません
+    # (mov テンプレートがすでにこれを行っています)。
+    # デモのためだけに書いています。
     sock = constants.eval(sock)
 %>
 
-## Other templates are inserted as a Python function call.
+## 他のテンプレートは Python の関数呼び出しとして挿入します。
     /* Push the message onto the stack */
     ${pushstr(message)}
 
@@ -114,8 +114,8 @@ Arguments:
     /* Invoke the write syscall */
     ${write('edi', 'esp', len(message))}
 
-## Templates can include conditional logic, to either include
-## or exclude certain sections.
+## テンプレートには条件分岐を含めて、
+## 特定のセクションを含めたり除いたりできます。
 %if spin:
     /* Loop forever */
 ${target}:
@@ -123,30 +123,30 @@ ${target}:
 %endif
 ```
 
-## Tips and Best Practices
+## ヒントとベストプラクティス
 
-And a few things to note about general "good style" for templates.
+テンプレートの一般的な「良いスタイル」について、いくつか注意点があります。
 
-- Use `common.label` instead of a constant label is preferred, since `common.label` ensures the label name is unique, even if the shellcode template is used multiple times.
-- Use the helper functions `mov`, `pushstr`, `syscall`, and the `syscall` wrappers (like `write` used below) instead of reinventing the wheel
-    + On some architectures, these emit NULL- and newline-free shellcode
-    + These themselves are just other shellcode templates with some logic
-- Any integer fields should be passed through `constants.eval` so that well-known constant values can be used instead.
+- 定数のラベルの代わりに `common.label` を使うことが推奨されます。シェルコードテンプレートが複数回使われても、`common.label` がラベル名を一意にしてくれるからです。
+- 車輪の再発明をせず、ヘルパー関数の `mov`、`pushstr`、`syscall`、および `syscall` のラッパー(下で使っている `write` など)を使ってください
+    + アーキテクチャによっては、これらは NULL や改行を含まないシェルコードを出力します
+    + これら自体も、ロジックを持つ別のシェルコードテンプレートにすぎません
+- 整数のフィールドはすべて `constants.eval` を通すと、よく知られた定数値を代わりに使えます。
     + `constants.eval("SYS_execve") ==> int`
     + `int(constants.SYS_execve) ==> int`
-    + If you're just passing it to another template, e.g. `mov`, this is already handled for you.
+    + `mov` など別のテンプレートに渡すだけの場合は、すでに処理されています。
 
-# FAQ and Common Problems
+# FAQ とよくある問題
 
 ## "Reserved words declared in template"
 
-You can't have any variables named `loop`, among some other things.  It's a limitation of Mako.
+`loop` という名前の変数などは使えません。これは Mako の制限です。
 
-## Template Caching
+## テンプレートのキャッシュ
 
-One problem you may run into is Mako template caching.  In order to make Pwntools as speedy as possible, the compiled templates are cached.  This is sometimes a burden on development of new shellcode, but in general is useful.
+Mako のテンプレートキャッシュが問題になることがあります。Pwntools をできるだけ高速にするため、コンパイル済みのテンプレートはキャッシュされます。これは新しいシェルコードの開発では負担になることもありますが、一般には有用です。
 
-If you run into weird problems, try clearing the cache in `~/.pwntools-cache/mako` (or `~/.pwntools-cache/mako`).
+おかしな問題が起きたら、`~/.pwntools-cache/mako`(または `~/.pwntools-cache/mako`)のキャッシュを消してみてください。
 
 [mako]: http://makotemplates.org
 [sh]: https://github.com/Gallopsled/pwntools/blob/master/pwnlib/shellcraft/templates/i386/linux/sh.asm

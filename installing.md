@@ -1,13 +1,14 @@
-Table of Contents
-=================
+目次
+=====
 
-  * [Installing Pwntools](#installing-pwntools)
-    * [Verifying Installation](#verifying-installation)
-    * [Foreign Architectures](#foreign-architectures)
+  * [Pwntools のインストール](#installing-pwntools)
+    * [インストールの確認](#verifying-installation)
+    * [他のアーキテクチャ](#foreign-architectures)
 
-# Installing Pwntools
+<a id="installing-pwntools"></a>
+# Pwntools のインストール
 
-This process is as straightforward as it can be.  Ubuntu 18.04 and 20.04 are the only "officially supported" platforms, in that they're the only platforms we do automated testing on.
+手順はできるだけ簡単にしてあります。「公式にサポートされている」プラットフォームは Ubuntu 18.04 と 20.04 だけです。自動テストを行っているのがこの 2 つだけだからです。
 
 ```sh
 $ apt-get update
@@ -16,17 +17,19 @@ $ python3 -m pip install --upgrade pip
 $ python3 -m pip install --upgrade pwntools
 ```
 
-## Verifying Installation
+<a id="verifying-installation"></a>
+## インストールの確認
 
-Everything should be A-OK if the following command succeeds:
+次のコマンドが成功すれば、問題なくインストールできています。
 
 ```sh
 $ python -c 'from pwn import *'
 ```
 
-## Foreign Architectures
+<a id="foreign-architectures"></a>
+## 他のアーキテクチャ
 
-If you want to assemble or disassemble code for foreign architectures, you need an appropriate `binutils` installation.  For Ubuntu and Mac OS X users, the [installation instructions][binutils] are available on docs.pwntools.com.
+他のアーキテクチャ向けのコードをアセンブルまたは逆アセンブルしたい場合は、適切な `binutils` のインストールが必要です。Ubuntu と Mac OS X のユーザー向けの[インストール手順][binutils]が docs.pwntools.com にあります。
 
 ```sh
 $ apt-get install binutils-*

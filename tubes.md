@@ -1,54 +1,60 @@
-Table of Contents
+目次
 =================
 
   * [Tubes](#tubes)
-    * [Basic IO](#basic-io)
-      * [Receiving data](#receiving-data)
-      * [Sending data](#sending-data)
-      * [Manipulating integers](#manipulating-integers)
-    * [Processes and Basic Features](#processes-and-basic-features)
-    * [Interactive Sessions](#interactive-sessions)
-    * [Networking](#networking)
+    * [基本的な入出力](#basic-io)
+      * [データの受信](#receiving-data)
+      * [データの送信](#sending-data)
+      * [整数の扱い](#manipulating-integers)
+    * [プロセスと基本機能](#processes-and-basic-features)
+    * [対話セッション](#interactive-sessions)
+    * [ネットワーク](#networking)
     * [Secure Shell](#secure-shell)
-    * [Serial Ports](#serial-ports)
+    * [シリアルポート](#serial-ports)
 
+<a id="tubes"></a>
 # Tubes
 
-Tubes are effectively I/O wrappers for most types of I/O you'll need to perform:
+Tubes は、必要になるほとんどの種類の入出力に対する入出力ラッパー(I/O wrapper)です。
 
-- Local processes
-- Remote TCP or UDP connections
-- Processes running on a remote server over SSH
-- Serial port I/O
+- ローカルプロセス
+- リモートの TCP または UDP 接続
+- SSH 経由でリモートサーバー上で動くプロセス
+- シリアルポートの入出力
 
-This introduction provides a few examples of the functionality provided, but more complex combinations are possible.  See [the full documentation][docs] for more information on how to perform regular expression matching, and connecting tubes together.
+この入門では機能の例をいくつか紹介しますが、さらに複雑な組み合わせも可能です。正規表現によるマッチングや tubes どうしの接続の方法については、[完全なドキュメント][docs]を参照してください。
 
-## Basic IO
+<a id="basic-io"></a>
+## 基本的な入出力
 
-The basic functions that you'll probably want out of your IO are:
+入出力に対して一般的に必要になる基本的な関数は次のとおりです。
 
-### Receiving data
+<a id="receiving-data"></a>
+### データの受信
 
-- `recv(n)` - Receive any number of available bytes
-- `recvline()` - Receive data until a newline is encountered
-- `recvuntil(delim)` - Receive data until a delimiter is found
-- `recvregex(pattern)` - Receive data until a regex pattern is satisfied
-- `recvrepeat(timeout)` - Keep receiving data until a timeout occurs
-- `clean()` - Discard all buffered data
+- `recv(n)` - 受信可能なバイト列を、任意の量だけ受信します
+- `recvline()` - 改行が現れるまでデータを受信します
+- `recvuntil(delim)` - 区切り文字が見つかるまでデータを受信します
+- `recvregex(pattern)` - 正規表現パターンに一致するまでデータを受信します
+- `recvrepeat(timeout)` - タイムアウトするまでデータを受信し続けます
+- `clean()` - バッファに残っているデータをすべて破棄します
 
-### Sending data
+<a id="sending-data"></a>
+### データの送信
 
-- `send(data)` - Sends data
-- `sendline(line)` - Sends data plus a newline
+- `send(data)` - データを送信します
+- `sendline(line)` - データに改行を付けて送信します
 
-### Manipulating integers
+<a id="manipulating-integers"></a>
+### 整数の扱い
 
-- `pack(int)` - Sends a word-size packed integer
-- `unpack()` - Receives and unpacks a word-size integer
+- `pack(int)` - ワードサイズにパックした整数を送信します
+- `unpack()` - ワードサイズの整数を受信してアンパックします
 
-## Processes and Basic Features
+<a id="processes-and-basic-features"></a>
+## プロセスと基本機能
 
-In order to create a tube to talk to a process, you just create a `process` object and give it the name of the target binary.
+プロセスと通信する tube を作るには、`process` オブジェクトを作り、対象のバイナリの名前を渡すだけです。
 
 ```py
 from pwn import *
@@ -59,7 +65,7 @@ io.recvline()
 # 'Hello, world\n'
 ```
 
-If you need to provide command-line arguments, or set the environment, additional options are available.  See [the full documentation][process] for more information;
+コマンドライン引数を渡したり環境変数を設定したりする必要がある場合は、追加のオプションが使えます。詳しくは[完全なドキュメント][process]を参照してください。
 
 ```py
 from pwn import *
@@ -69,7 +75,7 @@ io.recvline()
 # 'MYVAL\n'
 ```
 
-Reading binary data isn't a problem either.  You can receive up-to a number of bytes with `recv`, or block for an exact count with `recvn`.
+バイナリデータの読み取りも問題ありません。`recv` で最大指定バイト数まで受信することも、`recvn` で正確なバイト数が揃うまでブロックすることもできます。
 
 ```py
 from pwn import *
@@ -86,25 +92,27 @@ hex(io.unpack())
 # 0xa444444
 ```
 
-## Interactive Sessions
+<a id="interactive-sessions"></a>
+## 対話セッション
 
-Did you land a shell on the game server?  Hurray!  It's pretty easy to use it interactively.
+ゲームサーバーでシェルを取れましたか?やりましたね。対話的に使うのはとても簡単です。
 
 ```py
 from pwn import *
 
-# Let's pretend we're uber 1337 and landed a shell.
+# 自分は超 1337 で、シェルを取ったことにしましょう。
 io = process('sh')
 
-# <exploit goes here>
+# <ここにエクスプロイトを書く>
 
 io.interactive()
 ```
 
 
-## Networking
+<a id="networking"></a>
+## ネットワーク
 
-Creating a network connection is also easy, and has the exact same interface.  A `remote` object connects to somewhere else, while a `listen` object waits for a connection.
+ネットワーク接続の作成も簡単で、インターフェースはまったく同じです。`remote` オブジェクトはどこか別の場所に接続し、`listen` オブジェクトは接続を待ち受けます。
 
 ```py
 from pwn import *
@@ -115,7 +123,7 @@ io.recvline()
 # 'HTTP/1.0 200 OK\r\n'
 ```
 
-If you need to specify protocol information, it's also pretty straightforward.
+プロトコルの情報を指定する必要がある場合も、かなり簡単です。
 
 ```py
 from pwn import *
@@ -124,7 +132,7 @@ dns  = remote('8.8.8.8', 53, typ='udp')
 tcp6 = remote('google.com', 80, fam='ipv6')
 ```
 
-Listening for connections isn't much more complex.  Note that this listens for exactly one connection, then stops listening.
+接続の待ち受けもそれほど複雑ではありません。これはちょうど 1 つの接続を待ち受け、その後は待ち受けを止めることに注意してください。
 
 ```py
 from pwn import *
@@ -132,11 +140,12 @@ from pwn import *
 client = listen(8080).wait_for_connection()
 ```
 
+<a id="secure-shell"></a>
 ## Secure Shell
 
-SSH connectivity is similarly simple.  Compare the code below with that in "Hello Process" above.
+SSH 接続も同様に簡単です。下のコードを、上の「Hello Process」のコードと比べてみてください。
 
-You can also do more complex things with SSH, such as port forwarding and file upload / download.  See the [SSH tutorial][ssh] for more information.
+SSH ではポートフォワーディングやファイルのアップロード/ダウンロードなど、さらに複雑なこともできます。詳しくは [SSH チュートリアル][ssh]を参照してください。
 
 ```py
 from pwn import *
@@ -150,9 +159,10 @@ io.recvline()
 ```
 
 
-## Serial Ports
+<a id="serial-ports"></a>
+## シリアルポート
 
-In the event you need to get some local hacking done, there's also a serial tube.  As always, there is more information in the [full online documentation][serial].
+ローカルでハッキングする必要がある場合のために、シリアル tube もあります。いつもどおり、詳しい情報は[オンラインの完全なドキュメント][serial]にあります。
 
 ```py
 from pwn import *

@@ -1,12 +1,12 @@
-# shellcode
+# シェルコード
 
-Every once in a while, you'll need to run some shellcode.
+ときどき、シェルコードを実行する必要が出てきます。
 
-Before jumping into how to do things in Python with pwntools, it's worth exploring the command-line tools as they can really make life easy!
+pwntools を使って Python で作業する方法に入る前に、コマンドラインツールを調べておく価値があります。作業がとても楽になるからです。
 
 ## `asm`
 
-This command line tool does what it says on the tin.
+このコマンドラインツールは、名前のとおりのことをします。
 
 ```sh
 $ asm nop
@@ -15,9 +15,9 @@ $ asm 'mov eax, 0xdeadbeef'
 b8efbeadde
 ```
 
-There are a few output formats to choose from.  By default, the tool writes hex-encoded output to stdout if it's a terminal.  If it's a pipe or file, it will instead just write the binary data.
+出力形式はいくつか選べます。デフォルトでは、標準出力がターミナルの場合は 16 進エンコードした出力を書き出します。パイプやファイルの場合は、代わりにバイナリデータをそのまま書き出します。
 
-`phd` is a command that comes with pwntools which is very similar to `xxd`, but includes highlighting of printable ASCII values, NULL bytes, and some other special values.
+`phd` は pwntools に付属するコマンドで、`xxd` によく似ていますが、表示可能な ASCII 値、NULL バイト、その他いくつかの特殊な値を色分けして強調表示します。
 
 ```sh
 $ asm nop -f hex
@@ -29,7 +29,7 @@ $ asm nop | phd
 00000001
 ```
 
-Different architectures and endianness values can be selected as well, as long as you have an appropriate version of `binutils` installed.  See the [installation](installation.md) page for more information.
+適切なバージョンの `binutils` をインストールしていれば、異なるアーキテクチャやエンディアンも選べます。詳しくは[インストール](installation.md)のページを参照してください。
 
 ```sh
 $ asm -c arm nop
@@ -40,7 +40,7 @@ $ asm -c mips nop
 00000000
 ```
 
-Pwntools is also aware of most common constants, and resolves them in a context-sensitive manner.
+Pwntools はほとんどの一般的な定数も認識し、コンテキストに応じて解決します。
 
 ```sh
 $ asm 'push SYS_execve'
@@ -51,7 +51,7 @@ $ asm -c amd64 'push SYS_execve'
 
 ## `disasm`
 
-Disasm is the counterpart to `asm`.
+Disasm は `asm` の対になるツールです。
 
 ```sh
 $ asm 'push eax' | disasm
@@ -62,7 +62,7 @@ $ asm -c arm 'bx lr' | disasm -c arm
 
 ## `shellcraft`
 
-Shellcraft is the command-line interface to the shellcode library that comes with Pwntools.  To get a list of all avialable shellcode, just use the `shellcraft` command by itself.
+Shellcraft は、Pwntools に付属するシェルコードライブラリのコマンドラインインターフェースです。利用可能なシェルコードの一覧を得るには、`shellcraft` コマンドを単独で実行するだけです。
 
 ```sh
 $ shellcraft
@@ -72,9 +72,9 @@ aarch64.linux.acct
 ...
 ```
 
-Many of the shellcraft templates are just syscall wrappers, designed to make shellcode easier.  A few of them -- in particular `sh`, `dupsh`, and `echo` -- are compact implementations of common shellcode for `execve`, `dup2`ing file descriptors, and writing a string to `stdout`.
+shellcraft のテンプレートの多くは、シェルコードを書きやすくするためのシステムコールのラッパーにすぎません。そのうちのいくつか、特に `sh`、`dupsh`、`echo` は、よく使うシェルコードのコンパクトな実装です。それぞれ `execve`、ファイルディスクリプタの `dup2`、`stdout` への文字列の書き込みを行います。
 
-Like the `asm` tool, `shellcraft` has multiple output modes.
+`asm` ツールと同様に、`shellcraft` にも複数の出力モードがあります。
 
 ```sh
 $ shellcraft i386.linux.sh
@@ -94,13 +94,13 @@ $ shellcraft i386.linux.sh -fasm
     int 0x80
 ```
 
-## Debugging Shellcode
+## シェルコードのデバッグ
 
-Invariably, you'll want to debug your shellcode, or just experiment with a small snippet.  Pwntools makes this super easy!
+シェルコードをデバッグしたくなったり、小さなスニペットを試したくなったりすることは必ずあります。Pwntools なら、これがとても簡単です。
 
-### Emitting ELF files
+### ELF ファイルの出力
 
-The first option is to emit an ELF file which contains the shellcode, and load it in GDB manually.
+1 つ目の方法は、シェルコードを含む ELF ファイルを出力し、それを手動で GDB に読み込むことです。
 
 ```sh
 $ shellcraft i386.linux.sh -f elf > sh
@@ -115,7 +115,7 @@ execve("/bin///sh", [0], [/* 0 vars */]) = 0
 Hello!
 ```
 
-Some of the commands may take options, and all of them should be documented.  `shellcraft` will also resolve any constants it knows about.
+コマンドの中にはオプションを取るものもあり、すべてドキュメントが用意されているはずです。`shellcraft` は、認識できる定数も解決します。
 
 ```sh
 $ shellcraft i386.linux.echo -?
@@ -133,9 +133,9 @@ $ shellcraft i386.linux.mov eax SYS_execve
 6a0b58
 ```
 
-### Launching GDB
+### GDB の起動
 
-Instead of emitting an ELF and launching GDB manually, you can just jump straight into GDB.
+ELF を出力して GDB を手動で起動する代わりに、そのまま GDB に入ることもできます。
 
 ```sh
 $ shellcraft i386.linux.sh --debug

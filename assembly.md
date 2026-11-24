@@ -1,26 +1,28 @@
-Table of Contents
-=================
+目次
+=====
 
-  * [Assembly](#assembly)
-    * [Basic Assembly](#basic-assembly)
-    * [Canned assembly (shellcraft)](#canned-assembly-shellcraft)
-    * [Command-line Tools](#command-line-tools)
+  * [アセンブリ](#assembly)
+    * [基本的なアセンブリ](#basic-assembly)
+    * [既製のアセンブリ (shellcraft)](#canned-assembly-shellcraft)
+    * [コマンドラインツール](#command-line-tools)
       * [asm ](#asm)
       * [disasm ](#disasm)
       * [shellcraft ](#shellcraft)
-    * [Foreign Architectures](#foreign-architectures)
-      * [Canned Assembly](#canned-assembly)
-      * [Command-line Tools](#command-line-tools-1)
+    * [他のアーキテクチャ](#foreign-architectures)
+      * [既製のアセンブリ](#canned-assembly)
+      * [コマンドラインツール](#command-line-tools-1)
 
-# Assembly
+<a id="assembly"></a>
+# アセンブリ (Assembly)
 
-Pwntools makes it very easy to perform assembly in almost any architecture, and comes with a wide variety of canned-but-customizable shellcode ready to go out-of-the-box.
+Pwntools を使うと、ほぼあらゆるアーキテクチャのアセンブルがとても簡単にできます。また、カスタマイズできる既製のシェルコードが、すぐ使える形で数多く付属しています。
 
-In the [`walkthrough`](walkthrough) directory, there are several longer shellcode tutorials.  This page gives you the basics.
+[`walkthrough`](walkthrough) ディレクトリには、より長いシェルコードのチュートリアルがいくつかあります。このページでは基本を説明します。
 
-## Basic Assembly
+<a id="basic-assembly"></a>
+## 基本的なアセンブリ
 
-The most basic example, is to convert assembly into shellcode.
+最も基本的な例は、アセンブリをシェルコードに変換することです。
 
 ```py
 from pwn import *
@@ -32,9 +34,10 @@ print enhex(asm('xor edi, edi'))
 # 31ff
 ```
 
-## Canned assembly (`shellcraft`)
+<a id="canned-assembly-shellcraft"></a>
+## 既製のアセンブリ (`shellcraft`)
 
-The `shellcraft` module gives you pre-canned assembly.  It is generally customizable.  The easiest way to find out which `shellcraft` templates exist is to look at the [documentation on RTD](https://pwntools.readthedocs.org/en/latest/shellcraft.html).
+`shellcraft` モジュールは、あらかじめ用意されたアセンブリを提供します。たいていはカスタマイズできます。どんな `shellcraft` テンプレートがあるかを調べるいちばん簡単な方法は、[RTD のドキュメント](https://pwntools.readthedocs.org/en/latest/shellcraft.html)を見ることです。
 
 ```py
 from pwn import *
@@ -66,9 +69,10 @@ sh()
 6a68682f2f2f73682f62696e6a0b5889e331c999cd80
 ```
 
-## Command-line Tools
+<a id="command-line-tools"></a>
+## コマンドラインツール
 
-There are three command-line tools for interacting with assembly:
+アセンブリを扱うコマンドラインツールは 3 つあります。
 
 - `asm`
 - `disasm`
@@ -76,28 +80,28 @@ There are three command-line tools for interacting with assembly:
 
 ### `asm`
 
-The asm tool does what it says on the tin.  It provides several options for formatting the output.  When the output is a terminal, it defaults to hex-encoded.
+asm ツールは名前のとおりの働きをします。出力の書式を指定するオプションがいくつかあります。出力先が端末のときは、既定で 16 進数にエンコードされます。
 
 ```
 $ asm nop
 90
 ```
 
-When the output is anything else, it writes the raw data.
+出力先がそれ以外のときは、生のデータを書き出します。
 
 ```
 $ asm nop | xxd
 0000000: 90                                       .
 ```
 
-It also takes data on stdin if no instructions are provided on the command line.
+コマンドラインで命令が指定されなかった場合は、標準入力からデータを受け取ります。
 
 ```
 $ echo 'push ebx; pop edi' | asm
 535f
 ```
 
-Finally, it supports a few different options for specifying the output format, via the `--format` option.  Supported arguments are `raw`, `hex`, `string`, and `elf`.
+最後に、`--format` オプションで出力形式を指定できます。指定できる引数は `raw`、`hex`、`string`、`elf` です。
 
 ```
 $ asm --format=elf 'int3' > ./int3
@@ -107,7 +111,7 @@ Trace/breakpoint trap (core dumped)
 
 ### `disasm`
 
-Disasm is the opposite of `asm`.
+Disasm は `asm` の逆の働きをします。
 
 ```
 $ disasm cd80
@@ -118,16 +122,17 @@ $ asm nop | disasm
 
 ### `shellcraft`
 
-The `shellcraft` command is the command-line interface to the internal `shellcraft` module.  On the command-line, the full context must be specified, in the order of `arch.os.template`.
+`shellcraft` コマンドは、内部の `shellcraft` モジュールをコマンドラインから使うためのインターフェースです。コマンドラインでは、コンテキスト全体を `arch.os.template` の順で指定する必要があります。
 
 ```
 $ shellcraft i386.linux.sh
 6a68682f2f2f73682f62696e6a0b5889e331c999cd80
 ```
 
-## Foreign Architectures
+<a id="foreign-architectures"></a>
+## 他のアーキテクチャ
 
-Assembling for a foreign architecture requires that you have an appropriate version of `binutils` installed.  You should see [installing.md](installing.md) for more information on this.  The only change that is necessary is to set the architecture in the global context variable.  You can see more information about `context` in [context.md](context.md).
+他のアーキテクチャ向けにアセンブルするには、適切なバージョンの `binutils` がインストールされている必要があります。詳しくは [installing.md](installing.md) を見てください。必要な変更は、グローバルなコンテキスト変数にアーキテクチャを設定することだけです。`context` の詳細は [context.md](context.md) で確認できます。
 
 ```py
 from pwn import *
@@ -141,9 +146,10 @@ print enhex(asm('mov r0, r1'))
 # 0100a0e1
 ```
 
-### Canned Assembly
+<a id="canned-assembly"></a>
+### 既製のアセンブリ
 
-The `shellcraft` module automatically switches to the appropriate architecture.
+`shellcraft` モジュールは、適切なアーキテクチャに自動で切り替わります。
 
 ```py
 from pwn import *
@@ -163,9 +169,10 @@ bin_sh: .asciz "/bin/sh"
 08008fe20020a0e30210a0e10b0000ef2f62696e2f736800
 ```
 
-### Command-line Tools
+<a id="command-line-tools-1"></a>
+### コマンドラインツール
 
-You can also use the command line to assemble foreign-arch shellcode, by using the `--context` command-line option.
+他のアーキテクチャのシェルコードも、コマンドラインの `--context` オプションを使ってアセンブルできます。
 
 ```
 $ asm --context=arm 'mov r0, r1'

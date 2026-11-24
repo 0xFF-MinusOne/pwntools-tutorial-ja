@@ -1,21 +1,22 @@
-Table of Contents
+目次
 =================
 
-  * [Utility Functions](#utility-functions)
-    * [Packing and Unpacking Integers](#packing-and-unpacking-integers)
-    * [File I/O](#file-io)
-    * [Hashing and Encoding](#hashing-and-encoding)
+  * [ユーティリティ関数](#utility-functions)
+    * [整数のパックとアンパック](#packing-and-unpacking-integers)
+    * [ファイル入出力](#file-io)
+    * [ハッシュとエンコード](#hashing-and-encoding)
         * [Base64](#base64)
-        * [Hashes](#hashes)
-        * [URL Encoding](#url-encoding)
-        * [Hex Encoding](#hex-encoding)
-        * [Bit Manipulation and Hex Dumping](#bit-manipulation-and-hex-dumping)
-        * [Hex Dumping](#hex-dumping)
-    * [Patten Generation](#patten-generation)
+        * [ハッシュ](#hashes)
+        * [URL エンコード](#url-encoding)
+        * [16 進エンコード](#hex-encoding)
+        * [ビット操作と 16 進ダンプ](#bit-manipulation-and-hex-dumping)
+        * [16 進ダンプ](#hex-dumping)
+    * [パターン生成](#patten-generation)
 
-# Utility Functions
+<a id="utility-functions"></a>
+# ユーティリティ関数
 
-About half of Pwntools is utility functions so that you no longer need to copy paste things like this around:
+Pwntools の約半分はユーティリティ関数です。次のようなコードをあちこちにコピー&ペーストする必要はもうありません。
 
 ```py
 import struct
@@ -28,7 +29,7 @@ def u(x):
 1234 == u(p(1234))
 ```
 
-Instead, you just get nice little wrappers.  As an added bonus, everything is a bit more legible and easier to understand when reading someone else's exploit code.
+代わりに、便利な小さなラッパーが手に入ります。さらに、他人のエクスプロイトコードを読むときも、少し読みやすく理解しやすくなります。
 
 ```py
 from pwn import *
@@ -36,11 +37,12 @@ from pwn import *
 1234 == unpack(pack(1234))
 ```
 
-## Packing and Unpacking Integers
+<a id="packing-and-unpacking-integers"></a>
+## 整数のパックとアンパック
 
-This is probably the most common thing you'll do, so it's at the top.  The main `pack` and `unpack` functions are aware of the global settings in [`context`](context.md) such as `endian`, `bits`, and `sign`.
+これはおそらく最もよく行う操作なので、一番上に置いています。主要な `pack` 関数と `unpack` 関数は、[`context`](context.md) のグローバル設定(`endian`、`bits`、`sign` など)を認識します。
 
-You can also specify them explitily in the function call.
+関数呼び出しで明示的に指定することもできます。
 
 ```py
 pack(1)
@@ -65,9 +67,10 @@ hex(u16('AA'))
 # '0x4141'
 ```
 
-## File I/O
+<a id="file-io"></a>
+## ファイル入出力
 
-A single function call and it does what you want it to.
+関数を 1 回呼び出すだけで、やりたいことができます。
 
 ```py
 from pwn import *
@@ -79,17 +82,20 @@ read('filename', 1)
 # 'd'
 ```
 
-## Hashing and Encoding
+<a id="hashing-and-encoding"></a>
+## ハッシュとエンコード
 
-Quick access to lots of functions to transform your data into whatever format you need it in.
+データを必要な形式に変換するための多くの関数に、すばやくアクセスできます。
 
+<a id="base64"></a>
 #### Base64
 
 ```py
 'hello' == b64d(b64e('hello'))
 ```
 
-#### Hashes
+<a id="hashes"></a>
+#### ハッシュ
 
 ```py
 md5sumhex('hello') == '5d41402abc4b2a76b9719d911017c592'
@@ -98,13 +104,15 @@ md5filehex('file') == '5d41402abc4b2a76b9719d911017c592'
 sha1sumhex('hello') == 'aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d'
 ```
 
-#### URL Encoding
+<a id="url-encoding"></a>
+#### URL エンコード
 
 ```py
 urlencode("Hello, World!") == '%48%65%6c%6c%6f%2c%20%57%6f%72%6c%64%21'
 ```
 
-#### Hex Encoding
+<a id="hex-encoding"></a>
+#### 16 進エンコード
 
 ```py
 enhex('hello')
@@ -113,7 +121,8 @@ unhex('776f726c64')
 # 'world'
 ```
 
-#### Bit Manipulation and Hex Dumping
+<a id="bit-manipulation-and-hex-dumping"></a>
+#### ビット操作と 16 進ダンプ
 
 ```py
 bits(0b1000001) == bits('A')
@@ -122,7 +131,8 @@ unbits([0,1,0,1,0,1,0,1])
 # 'U'
 ```
 
-#### Hex Dumping
+<a id="hex-dumping"></a>
+#### 16 進ダンプ
 
 ```py
 print hexdump(read('/dev/urandom', 32))
@@ -131,18 +141,19 @@ print hexdump(read('/dev/urandom', 32))
 # 00000020
 ```
 
-## Pattern Generation
+<a id="patten-generation"></a>
+## パターン生成
 
-Pattern generation is a very handy way to find offsets without needing to do math.
+パターン生成(pattern generation)は、計算をしなくてもオフセットを見つけられる、とても便利な方法です。
 
-Let's say we have a straight buffer overflow, and we generate a pattern and provide it to the target application.
+単純なバッファオーバーフローがあるとして、パターンを生成し、それを対象のアプリケーションに渡したとしましょう。
 
 ```py
 io = process(...)
 io.send(cyclic(512))
 ```
 
-In the core dump, we might see that the crash occurs at 0x61616178.  We can avoid needing to do any analysis of the crash frame by just punching that number back in and getting an offset.
+コアダンプを見ると、クラッシュが 0x61616178 で起きていることがわかるかもしれません。クラッシュ時のフレームを分析しなくても、その数値を入力し直すだけでオフセットが得られます。
 
 ```py
 cyclic_find(0x61616178)
