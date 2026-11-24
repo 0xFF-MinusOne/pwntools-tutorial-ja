@@ -1,4 +1,10 @@
-> これは [Gallopsled/pwntools-tutorial](https://github.com/Gallopsled/pwntools-tutorial) の日本語訳です。原著のライセンス (MIT) に従います。著作権表示は LICENSE にあります。訳したのは説明文と、コード内のコメントです。コードは原著のままです。
+> **これは日本語訳です。**
+>
+> - 原著: [Gallopsled/pwntools-tutorial](https://github.com/Gallopsled/pwntools-tutorial)(原著者: Gallopsled)
+> - ライセンス: MIT — 翻訳も同じライセンスです([ライセンス全文](LICENSE))。原文から翻訳(変更)しています
+> - 訳した範囲: 全ページの説明文と、コード内のコメント(コードは原著のまま)
+> - 訳していないもの: ワークショップのノートブック `37C3.ipynb`
+> - 他の日本語訳: [一覧](https://github.com/orgs/0xFF-MinusOne/repositories?q=-ja)
 
 # Pwntools チュートリアル
 
