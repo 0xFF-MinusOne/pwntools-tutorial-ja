@@ -1,0 +1,14 @@
+{
+  "upstreams": [
+    {
+      "repo": "Gallopsled/pwntools-tutorial",
+      "branch": "master",
+      "paths": [
+        "*.md",
+        "walkthrough",
+        "37C3.ipynb"
+      ],
+      "base": "353bafd7a3ecf34a47f461ecb242a9b34c155d0f"
+    }
+  ]
+}
