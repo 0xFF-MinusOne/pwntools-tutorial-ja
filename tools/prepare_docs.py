@@ -24,4 +24,8 @@ for ext in ("png", "jpg", "jpeg", "gif", "svg"):
         dst = out / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(p, dst)
+# 見た目の上書き(白黒の配色とコードの窓)
+(out / "assets").mkdir()
+for name in ("extra.css", "extra.js"):
+    shutil.copy2(root / "theme" / name, out / "assets" / name)
 print(f"prepared {sum(1 for _ in out.rglob('*') if _.is_file())} files in {out}")

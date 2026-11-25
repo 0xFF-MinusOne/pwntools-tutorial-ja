@@ -14,7 +14,6 @@ theme:
   language: ja
   features:
     - navigation.top
-    - content.code.copy
     - search.highlight
   palette:
     - media: "(prefers-color-scheme: light)"
@@ -28,6 +27,11 @@ theme:
         icon: material/weather-sunny
         name: ライトモードに切り替え
 
+extra_css:
+  - assets/extra.css
+extra_javascript:
+  - assets/extra.js
+
 plugins:
   - search:
       lang: ja
@@ -38,6 +42,7 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight:
       anchor_linenums: true
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - attr_list
   - md_in_html
