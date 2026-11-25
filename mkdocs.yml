@@ -22,10 +22,6 @@ theme:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
 
-extra_css:
-  - assets/extra.css
-extra_javascript:
-  - assets/extra.js
 
 plugins:
   - search:
@@ -72,3 +68,10 @@ nav:
       - シェルコード(上級): walkthrough/shellcode-advanced/README.md
   - 原著(GitHub): https://github.com/Gallopsled/pwntools-tutorial
   - ワークショップのノートブック(GitHub): https://github.com/0xFF-MinusOne/pwntools-tutorial-ja/blob/main/37C3.ipynb
+
+extra_css:
+  - assets/ja-docs.css
+  - assets/mkdocs.css
+
+extra_javascript:
+  - assets/ja-docs.js

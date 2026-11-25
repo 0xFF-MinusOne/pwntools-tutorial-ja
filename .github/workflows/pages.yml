@@ -24,6 +24,7 @@ jobs:
           python-version: "3.12"
       - run: pip install mkdocs mkdocs-material pymdown-extensions
       - run: python tools/prepare_docs.py
+      - run: python tools/copy_theme.py
       - run: mkdocs build
       - uses: actions/upload-pages-artifact@v3
         with:

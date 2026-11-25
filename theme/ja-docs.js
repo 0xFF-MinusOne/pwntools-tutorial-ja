@@ -6,11 +6,11 @@
 
   function languageOf(pre) {
     var code = pre.querySelector('code');
-    var m = ((code && code.className) + ' ' + pre.className + ' ' + (pre.parentNode.className||'')).match(/language-([\w+#-]+)/);
+    var m = ((code && code.className) + ' ' + pre.className + ' ' + (pre.parentNode.className || '')).match(/language-([\w+#-]+)/);
     return m ? m[1] : 'text';
   }
 
-  [].forEach.call(document.querySelectorAll('.md-typeset pre'), function (pre) {
+  [].forEach.call(document.querySelectorAll('.md-typeset pre, .doc pre'), function (pre) {
     if (pre.parentNode.classList.contains('code-block')) return;
     var frame = document.createElement('div');
     frame.className = 'code-block';
@@ -48,15 +48,17 @@
   });
 })();
 
-/* 誤訳を知らせる: ページごとに、題名と URL を入れた issue の作成画面を開く */
+/* 誤訳を知らせる: ページごとに、題名と URL を入れた issue の作成画面を開く。
+   リポジトリは window.JaDocs.repo、なければ Material のヘッダーのリンクから取る。 */
 (function () {
+  var cfg = window.JaDocs || {};
   var source = document.querySelector('a.md-source');
-  var article = document.querySelector('.md-content__inner');
-  if (!source || !article) return;
+  var repo = (cfg.repo || (source && source.href) || '').replace(/\/$/, '');
+  var article = document.querySelector('.md-content__inner, #main');
+  if (!repo || !article || article.querySelector('.report')) return;
 
-  var repo = source.href.replace(/\/$/, '');
-  /* 題名はタブの題名から取る(本文の最初の h1 は目次になっていることがある) */
-  var title = document.title.split(' - ')[0].trim();
+  /* 題名はタブの題名から取る(本文の最初の見出しが目次のことがある) */
+  var title = document.title.split(/\s[-|]\s/)[0].trim();
   var body = [
     '## どのページの、どこ', '', location.href.split('#')[0], '',
     '## 今の訳', '', '',
