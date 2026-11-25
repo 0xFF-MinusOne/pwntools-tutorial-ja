@@ -47,3 +47,29 @@
     frame.append(header, pre);
   });
 })();
+
+/* 誤訳を知らせる: ページごとに、題名と URL を入れた issue の作成画面を開く */
+(function () {
+  var source = document.querySelector('a.md-source');
+  var article = document.querySelector('.md-content__inner');
+  if (!source || !article) return;
+
+  var repo = source.href.replace(/\/$/, '');
+  /* 題名はタブの題名から取る(本文の最初の h1 は目次になっていることがある) */
+  var title = document.title.split(' - ')[0].trim();
+  var body = [
+    '## どのページの、どこ', '', location.href.split('#')[0], '',
+    '## 今の訳', '', '',
+    '## 直す案', '', '',
+    '## 理由（原文の該当箇所など）', '', ''
+  ].join('\n');
+
+  var link = document.createElement('a');
+  link.className = 'report';
+  link.rel = 'noopener';
+  link.href = repo + '/issues/new?template=mistranslation.md' +
+    '&title=' + encodeURIComponent('誤訳: ' + title) +
+    '&body=' + encodeURIComponent(body);
+  link.textContent = '誤訳を知らせる';
+  article.append(link);
+})();

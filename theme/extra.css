@@ -122,3 +122,19 @@
 }
 .code-copy:hover,
 .code-copy[data-copied] { color: var(--win-text); }
+
+/* 誤訳を知らせるボタン(本文の末尾) */
+.md-typeset .report {
+  display: inline-block;
+  margin-top: 40px;
+  padding: 6px 14px;
+  border: 1px solid var(--md-default-fg-color);
+  color: var(--md-default-fg-color);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.md-typeset .report:hover {
+  background: var(--md-default-fg-color);
+  color: var(--md-default-bg-color);
+}
