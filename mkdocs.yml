@@ -80,3 +80,5 @@ extra_css:
 
 extra_javascript:
   - assets/ja-docs.js
+  - assets/glossary-pwntools.js
+  - assets/glossary.js
