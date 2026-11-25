@@ -8,6 +8,7 @@ copyright: >-
   <a href="https://github.com/Gallopsled/pwntools-tutorial">Gallopsled/pwntools-tutorial</a>
   (<a href="http://pwntools.com">pwntools.com</a>)
   / ライセンス: <a href="https://github.com/0xFF-MinusOne/pwntools-tutorial-ja/blob/main/LICENSE">MIT</a>
+  <br>Unofficial Japanese translation of <a href="https://github.com/Gallopsled/pwntools-tutorial">Gallopsled/pwntools-tutorial</a>. Not reviewed or endorsed by the original authors; the original text prevails.
 
 theme:
   name: material
