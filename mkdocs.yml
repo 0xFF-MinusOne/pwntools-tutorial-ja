@@ -14,6 +14,7 @@ theme:
   language: ja
   features:
     - navigation.top
+    - navigation.footer
     - search.highlight
   palette:
     - media: "(prefers-color-scheme: light)"
