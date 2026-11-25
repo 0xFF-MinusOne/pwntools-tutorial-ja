@@ -12,6 +12,9 @@ copyright: >-
 theme:
   name: material
   language: ja
+  font: false
+  logo: assets/minusone-mark.svg
+  favicon: assets/minusone-avatar-light.svg
   features:
     - navigation.top
     - navigation.footer
@@ -72,6 +75,7 @@ nav:
 extra_css:
   - assets/ja-docs.css
   - assets/mkdocs.css
+  - assets/minusone.css
 
 extra_javascript:
   - assets/ja-docs.js
